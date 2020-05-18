@@ -11,7 +11,8 @@ import java.io.Serializable;
 
 @Component
 public class JwtEntryPoints implements AuthenticationEntryPoint, Serializable {
-    private static final long serialVersionUID = -7858869558953243875L;
+
+    private static final long serialVersionUID = 763706453912927477L;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,

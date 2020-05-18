@@ -2,11 +2,11 @@ package com.bridgelaz.bridgelabzlms.dto;
 
 import java.io.Serializable;
 
-public class ResponseJwt implements Serializable {
-    private static final long serialVersionUID = -8091879091924046844L;
+public class LoginResponse implements Serializable {
+    private static final long serialVersionUID = 3631838363180478531L;
     private final String jwttoken;
 
-    public ResponseJwt(String jwttoken) {
+    public LoginResponse(String jwttoken) {
         this.jwttoken = jwttoken;
     }
 

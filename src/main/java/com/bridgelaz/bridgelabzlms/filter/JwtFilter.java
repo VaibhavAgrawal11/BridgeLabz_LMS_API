@@ -1,6 +1,6 @@
 package com.bridgelaz.bridgelabzlms.filter;
 
-import com.bridgelaz.bridgelabzlms.service.JwtUserService;
+import com.bridgelaz.bridgelabzlms.service.UserService;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +19,7 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     @Autowired
-    private JwtUserService jwtUserService;
+    private UserService userService;
 
     @Autowired
     private Token token;
@@ -45,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.jwtUserService.loadUserByUsername(username);
+            UserDetails userDetails = this.userService.loadUserByUsername(username);
             // if token is valid configure Spring Security to manually set authentication
             if (token.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(

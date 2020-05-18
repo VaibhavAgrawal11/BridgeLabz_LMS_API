@@ -2,17 +2,17 @@ package com.bridgelaz.bridgelabzlms.dto;
 
 import java.io.Serializable;
 
-public class RequestJwt implements Serializable {
-    private static final long serialVersionUID = 5926468583005150707L;
+public class LoginRequest implements Serializable {
 
+    private static final long serialVersionUID = 4304137534438900456L;
     private String username;
     private String password;
 
     //Default constructor for JSON Parsing
-    public RequestJwt() {
+    public LoginRequest() {
     }
 
-    public RequestJwt(String username, String password) {
+    public LoginRequest(String username, String password) {
         this.setUsername(username);
         this.setPassword(password);
     }
