@@ -1,5 +1,8 @@
 package com.bridgelaz.bridgelabzlms.service;
 
-public interface ISignUpService {
-    public LoginResponse save(UserDTO user);
+import com.bridgelaz.bridgelabzlms.dto.LoginDTO;
+import com.bridgelaz.bridgelabzlms.dto.UserDTO;
+
+public interface UserService {
+    public LoginDTO save(UserDTO userDto);
 }

@@ -1,10 +1,18 @@
 package com.bridgelaz.bridgelabzlms.service;
 
+import com.bridgelaz.bridgelabzlms.dto.LoginDTO;
+import com.bridgelaz.bridgelabzlms.dto.UserDTO;
+import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-public class SignUpServiceImpl implements UserService {
+import java.time.LocalDateTime;
+
+@Service
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
@@ -15,13 +23,13 @@ public class SignUpServiceImpl implements UserService {
     private ModelMapper modelMapper;
 
     @Override
-    public LoginResponse save(UserDTO user) {
+    public LoginDTO save(UserDTO user) {
         user.setCreator_stamp(LocalDateTime.now());
         user.setCreator_user(user.getFirst_name());
         user.setVerified("yes");
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         User newUser = modelMapper.map(user, User.class);
         userRepository.save(newUser);
-        return new LoginResponse(200, "Register successfull");
+        return new LoginDTO(200, "successfully Registered");
     }
 }
