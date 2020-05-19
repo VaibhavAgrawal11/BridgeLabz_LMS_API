@@ -1,12 +1,14 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
+import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
 import com.bridgelaz.bridgelabzlms.service.HiredCandidateServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class HireCandidateController {
@@ -23,5 +25,10 @@ public class HireCandidateController {
     @GetMapping("/hiredCandidate/getAllCandidates")
     public List getAllHiredCandidate() throws IOException {
         return hiredCandidateService.getAllHiredCandidates();
+    }
+
+    @GetMapping("/hiredCandidate/viewProfile")
+    public Optional<HiredCandidateModel> viewCandidateProfile(@RequestParam int id) throws IOException {
+        return hiredCandidateService.viewCandidateProfile(id);
     }
 }
