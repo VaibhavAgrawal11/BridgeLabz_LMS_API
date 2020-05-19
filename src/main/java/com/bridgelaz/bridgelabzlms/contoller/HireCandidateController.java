@@ -3,10 +3,7 @@ package com.bridgelaz.bridgelabzlms.contoller;
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.HiredCandidateServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,5 +18,10 @@ public class HireCandidateController {
         List hiredCandidate = hiredCandidateService.getHiredCandidate(filePath);
         hiredCandidateService.saveCandidateDetails(hiredCandidate);
         return new UserResponse(200, "Successfully Noted");
+    }
+
+    @GetMapping("/hiredCandidate/getAllCandidates")
+    public List getAllHiredCandidate() throws IOException {
+        return hiredCandidateService.getAllHiredCandidates();
     }
 }
