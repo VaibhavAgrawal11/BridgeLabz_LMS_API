@@ -97,4 +97,8 @@ public class HiredCandidateServiceImpl implements HireCandidateService {
             hiredCandidateRepository.save(hiredCandidateModel);
         }
     }
+
+    public List getAllHiredCandidates() {
+        return hiredCandidateRepository.findAll();
+    }
 }
