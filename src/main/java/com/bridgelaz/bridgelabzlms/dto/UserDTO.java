@@ -1,11 +1,18 @@
 package com.bridgelaz.bridgelabzlms.dto;
 
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class UserDTO {
+    @Size(max = 100)
+    @Pattern(regexp = "^[A-Z]+[A-Za-z0-9]{1,}$")
     private String first_name;
+    @Size(max = 100)
+    @Pattern(regexp = "^[A-Z]+[A-Za-z0-9]{1,}$")
     private String last_name;
     private String email;
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]*.{8,}$")
     private String password;
     private long contact_number;
     private String Verified;
