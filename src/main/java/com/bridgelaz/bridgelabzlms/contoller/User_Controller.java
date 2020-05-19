@@ -63,7 +63,7 @@ public class User_Controller {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
-    @GetMapping("/forgetPassword")
+    @GetMapping("/user/forgetPassword")
     public UserResponse requestResetPassword(@Valid @RequestParam @Email String emailAddress) throws AddressException, MessagingException {
         User user = userRepository.findByEmail(emailAddress);
         final String token = jwtTokenUtil.generatePasswordResetToken(String.valueOf(user.getId()));
