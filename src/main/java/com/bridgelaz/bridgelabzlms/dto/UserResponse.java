@@ -1,9 +1,9 @@
 package com.bridgelaz.bridgelabzlms.dto;
 
-public class LoginDTO {int status;
+public class UserResponse {int status;
     String message;
 
-    public LoginDTO(int status, String message) {
+    public UserResponse(int status, String message) {
         this.status = status;
         this.message = message;
     }
