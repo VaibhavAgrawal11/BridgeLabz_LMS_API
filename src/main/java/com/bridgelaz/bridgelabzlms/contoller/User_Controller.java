@@ -38,7 +38,7 @@ public class User_Controller {
         return "Welcome to Bridgelabz LMS API development project.";
     }
 
-    @RequestMapping(value = "/user/register", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity<?> saveUser(@Valid @RequestBody UserDTO user) throws Exception {
         return ResponseEntity.ok(userService.save(user));
     }
@@ -71,7 +71,7 @@ public class User_Controller {
         return new UserResponse(200, token);
     }
 
-    @PutMapping("/user/resetPassword")
+    @PutMapping("/reset_password")
     public UserResponse resetPassword(@Valid @RequestBody ResetPassword resetPassword) {
         boolean result = userService.resetPassword(resetPassword.getPassword(), resetPassword.getToken());
         if (result)
