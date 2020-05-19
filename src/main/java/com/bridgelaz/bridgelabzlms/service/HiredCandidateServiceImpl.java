@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HiredCandidateServiceImpl implements HireCandidateService {
@@ -100,5 +101,11 @@ public class HiredCandidateServiceImpl implements HireCandidateService {
 
     public List getAllHiredCandidates() {
         return hiredCandidateRepository.findAll();
+    }
+
+    @Override
+    public Optional<HiredCandidateModel> viewCandidateProfile(Integer id) {
+        Optional<HiredCandidateModel> hiredCandidateModel = hiredCandidateRepository.findById(id);
+        return hiredCandidateModel;
     }
 }
