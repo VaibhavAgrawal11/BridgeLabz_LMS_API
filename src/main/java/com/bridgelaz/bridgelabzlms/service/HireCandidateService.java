@@ -11,4 +11,6 @@ public interface HireCandidateService {
     void saveCandidateDetails(List hiredCandidate);
 
     Optional<HiredCandidateModel> viewCandidateProfile(Integer id);
+
+    List getAllHiredCandidates();
 }

@@ -63,7 +63,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sentEmail(User user, String token) throws MessagingException {
+    public UserResponse sentEmail(String emailAddress) throws MessagingException {
+        User user = userRepository.findByEmail(emailAddress);
+        final String token = jwtToken.generatePasswordResetToken(String.valueOf(user.getId()));
         String recipientAddress = user.getEmail();
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -71,6 +73,7 @@ public class UserServiceImpl implements UserService {
         helper.setText("Hii " + user.getFirst_name() + "\n" + " You requested to reset password, if YES then click on link put your new password and NO then ignore");
         helper.setSubject("Password-Reset-Request");
         sender.send(message);
+        return new UserResponse(200, token);
     }
 
     @Override

@@ -10,7 +10,7 @@ import javax.mail.MessagingException;
 public interface UserService extends UserDetailsService {
     public UserResponse save(UserDTO userDto);
 
-    public void sentEmail(User user, String token) throws MessagingException;
-
     boolean resetPassword(String password, String token);
+
+    UserResponse sentEmail(String emailAddress) throws MessagingException;
 }
