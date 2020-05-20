@@ -49,19 +49,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().disable()
-                .authorizeRequests().antMatchers("/user/login", "/user/register"
-                , "/user/forgetPassword", "/user/resetPassword"
-                , "/hiredCandidate/postCandidateList", "/hiredCandidate/getAllCandidates"
-                , "/hiredCandidate/viewProfile").permitAll().
-                anyRequest().authenticated().and().
-                exceptionHandling().authenticationEntryPoint(jwtEntryPoint).and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-    }
-
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
@@ -69,4 +56,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return mapper;
     }
 
+    /*
+     * Configuring the authorities to access the end points of the application
+     * */
+    @Override
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf().disable()
+                .authorizeRequests().antMatchers("/user/login", "/user/register"
+                , "/user/forgetpassword", "/user/resetpassword"
+                , "/hiredcandidate/takecandidatelist", "/hiredcandidate/allcandidates"
+                , "/hiredcandidate/viewprofile").permitAll().
+                anyRequest().authenticated().and().
+                exceptionHandling().authenticationEntryPoint(jwtEntryPoint).and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    }
 }
