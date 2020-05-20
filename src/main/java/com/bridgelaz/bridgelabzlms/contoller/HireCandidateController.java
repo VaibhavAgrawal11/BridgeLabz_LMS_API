@@ -2,7 +2,7 @@ package com.bridgelaz.bridgelabzlms.contoller;
 
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
-import com.bridgelaz.bridgelabzlms.service.HireCandidateService;
+import com.bridgelaz.bridgelabzlms.service.IHireCandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,24 +11,39 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/hireCandidate")
+@RequestMapping("/hirecandidate")
+/*
+ *Hire candidate controller takes service of IHireCandidateService interface
+ * */
 public class HireCandidateController {
     @Autowired
-    private HireCandidateService hiredCandidateService;
+    private IHireCandidateService hiredCandidateService;
 
-    @PostMapping("/postCandidateList")
+    /*
+     * Take excel sheet of candidates and drop the list database
+     * @param file path
+     * @return UserResponse
+     * */
+    @PostMapping("/takecandidatelist")
     public UserResponse importHiredCandidate(@RequestParam String filePath) throws IOException {
-        List hiredCandidate = hiredCandidateService.getHiredCandidate(filePath);
-        hiredCandidateService.saveCandidateDetails(hiredCandidate);
-        return new UserResponse(200, "Successfully Noted");
+        return hiredCandidateService.dropHireCandidateInDataBase(filePath);
+
     }
 
-    @GetMapping("/getAllCandidates")
+    /*
+     * Returns list of candidate names
+     * */
+    @GetMapping("/allcandidates")
     public List getAllHiredCandidate() throws IOException {
         return hiredCandidateService.getAllHiredCandidates();
     }
 
-    @GetMapping("/viewProfile")
+    /*
+     * Takes id of candidate and give his/her profile details
+     * @param id
+     * @return HireCandidateModel
+     * */
+    @GetMapping("/viewprofile")
     public Optional<HiredCandidateModel> viewCandidateProfile(@RequestParam int id) throws IOException {
         return hiredCandidateService.viewCandidateProfile(id);
     }

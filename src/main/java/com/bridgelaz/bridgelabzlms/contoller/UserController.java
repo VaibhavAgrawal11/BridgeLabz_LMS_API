@@ -13,36 +13,55 @@ import javax.validation.constraints.Email;
 
 @RestController
 @RequestMapping("/user")
+/*
+ *User controller takes service of IUserService interface
+ * */
 public class UserController {
     @Autowired
     private IUserService IUserService;
 
-
-    @RequestMapping({"/hello", "", "/"})
+    @RequestMapping({"/home", "", "/"})
     public String displayHomePage() {
         return "Welcome to Bridgelabz LMS API development project.";
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> saveUser(@Valid @RequestBody UserDTO user) throws Exception {
+    /*
+     * Take user details to register in database
+     * @param UserDTO
+     * @return UserResponse
+     * */
+    @PostMapping(value = "/register")
+    public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserDTO user) throws Exception {
         return ResponseEntity.ok(IUserService.save(user));
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    /*
+     * Takes user name and password to login in application
+     * @param LoginRequest
+     * @return LoginResponse
+     * */
+    @PostMapping(value = "/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws Exception {
         return IUserService.login(loginRequest);
     }
 
-    @GetMapping("/forgetPassword")
+    /*
+     * Takes email address from user and sends mail to reset password again
+     * @param email address
+     * @return UserResponse
+     * */
+    @GetMapping("/forgotpassword")
     public UserResponse requestResetPassword(@Valid @RequestParam @Email String emailAddress) throws AddressException, MessagingException {
         return IUserService.sentEmail(emailAddress);
     }
 
-    @PutMapping("/resetPassword")
+    /*
+     * Takes new password and JWT for user authorization
+     * @param ResentPassword
+     * @return UserResponse
+     * */
+    @PutMapping("/resetpassword")
     public UserResponse resetPassword(@Valid @RequestBody ResetPassword resetPassword) {
-        boolean result = IUserService.resetPassword(resetPassword.getPassword(), resetPassword.getToken());
-        if (result)
-            return new UserResponse(200, "Successfully updated");
-        return new UserResponse(500, "UnSuccessFull");
+        return IUserService.resetPassword(resetPassword.getPassword(), resetPassword.getToken());
     }
 }

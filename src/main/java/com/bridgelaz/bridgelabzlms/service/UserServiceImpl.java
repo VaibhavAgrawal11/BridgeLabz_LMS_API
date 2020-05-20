@@ -53,10 +53,15 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private Token jwtTokenUtil;
 
+    /*
+     * This method maps the users details in the the database
+     * @param UserDto
+     * @return UserResponse
+     */
     @Override
     public UserResponse save(UserDTO user) {
-        user.setCreator_stamp(LocalDateTime.now());
-        user.setCreator_user(user.getFirst_name());
+        user.setCreatorStamp(LocalDateTime.now());
+        user.setCreatorUser(user.getFirstName());
         user.setVerified("yes");
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         User newUser = modelMapper.map(user, User.class);
@@ -64,16 +69,26 @@ public class UserServiceImpl implements IUserService {
         return new UserResponse(200, "successfully Registered");
     }
 
+    /*
+     * This method maps the users details in the the inbuilt UserDetails class
+     * @param user name
+     * @return UserDetails
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = (User) userRepository.findByFirstName(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
-        return new org.springframework.security.core.userdetails.User(user.getFirst_name(), user.getPassword(),
+        return new org.springframework.security.core.userdetails.User(user.getFirstName(), user.getPassword(),
                 new ArrayList<>());
     }
 
+    /*
+     * Takes email address from user and sends mail to reset password again
+     * @param email address
+     * @return UserResponse
+     * */
     @Override
     public UserResponse sentEmail(String emailAddress) throws MessagingException {
         User user = userRepository.findByEmail(emailAddress);
@@ -82,12 +97,17 @@ public class UserServiceImpl implements IUserService {
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setTo(recipientAddress);
-        helper.setText("Hii " + user.getFirst_name() + "\n" + " You requested to reset password, if YES then click on link put your new password and NO then ignore");
+        helper.setText("Hii " + user.getFirstName() + "\n" + " You requested to reset password, if YES then click on link put your new password and NO then ignore");
         helper.setSubject("Password-Reset-Request");
         sender.send(message);
         return new UserResponse(200, token);
     }
 
+    /*
+     * Takes user name and password to login in application
+     * @param LoginRequest
+     * @return LoginResponse
+     * */
     @Override
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) throws Exception {
         try {
@@ -107,19 +127,23 @@ public class UserServiceImpl implements IUserService {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
+    /*
+     * Takes new password and JWT for user authorization
+     * @param ResentPassword
+     * @return UserResponse
+     * */
     @Override
-    public boolean resetPassword(String password, String token) {
+    public UserResponse resetPassword(String password, String token) {
         String encodedPassword = bcryptEncoder.encode(password);
         if (jwtToken.isTokenExpired(token)) {
-            return false;
+            return new UserResponse(500, "UnSuccessFull");
         }
-        String username = jwtToken.getSubjectFromToken(token);
+        String username = jwtToken.getUsernameFromToken(token);
         User user = userRepository.findByFirstName(username);
         user.setPassword(encodedPassword);
         User updatedUser = userRepository.save(user);
         if (updatedUser.getPassword().equalsIgnoreCase(encodedPassword))
-            return true;
-        return false;
+            return new UserResponse(200, "Successfully updated");
+        return new UserResponse(500, "UnSuccessFull");
     }
-
 }
