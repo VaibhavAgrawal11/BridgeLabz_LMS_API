@@ -20,7 +20,7 @@ public class UserController {
     @Autowired
     private IUserService IUserService;
 
-    @RequestMapping({"/home", "", "/"})
+    @GetMapping("/")
     public String displayHomePage() {
         return "Welcome to Bridgelabz LMS API development project.";
     }

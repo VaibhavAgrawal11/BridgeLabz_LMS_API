@@ -101,7 +101,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         List<HiredCandidateModel> list = hiredCandidateRepository.findAll();
         List<String> candidateList = new ArrayList<>();
         for (HiredCandidateModel hiredCandidateModel : list) {
-            candidateList.add(hiredCandidate.getId() + " " + "--->"
+            candidateList.add((Integer) hiredCandidateModel.getId() + " " + "--->"
                     + " " + hiredCandidateModel.getFirstName()
                     + "." + hiredCandidateModel.getMiddleName()
                     + "." + hiredCandidateModel.getLastName());

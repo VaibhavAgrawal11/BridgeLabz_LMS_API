@@ -60,25 +60,25 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public UserResponse save(UserDTO user) {
-        user.setCreatorStamp(LocalDateTime.now());
-        user.setCreatorUser(user.getFirstName());
-        user.setVerified("yes");
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         User newUser = modelMapper.map(user, User.class);
+        newUser.setCreatorStamp(LocalDateTime.now());
+        newUser.setCreatorUser(newUser.getFirstName());
+        newUser.setVerified("yes");
         userRepository.save(newUser);
         return new UserResponse(200, "successfully Registered");
     }
 
     /*
      * This method maps the users details in the the inbuilt UserDetails class
-     * @param user name
+     * @param email id
      * @return UserDetails
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = (User) userRepository.findByFirstName(username);
+    public UserDetails loadUserByUsername(String emailId) throws UsernameNotFoundException {
+        User user = (User) userRepository.findByEmail(emailId);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException("User not found with username: " + emailId);
         }
         return new org.springframework.security.core.userdetails.User(user.getFirstName(), user.getPassword(),
                 new ArrayList<>());
@@ -112,7 +112,7 @@ public class UserServiceImpl implements IUserService {
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) throws Exception {
         try {
             authenticationManager.authenticate
-                    (new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                    (new UsernamePasswordAuthenticationToken(loginRequest.getEmailId(),
                             loginRequest.getPassword()));
         } catch (DisabledException e) {
             throw new Exception("USER_DISABLED", e);
@@ -120,7 +120,7 @@ public class UserServiceImpl implements IUserService {
             throw new Exception("INVALID_CREDENTIALS", e);
         }
 
-        final UserDetails userDetails = this.loadUserByUsername(loginRequest.getUsername());
+        final UserDetails userDetails = this.loadUserByUsername(loginRequest.getEmailId());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
 
@@ -139,7 +139,7 @@ public class UserServiceImpl implements IUserService {
             return new UserResponse(500, "UnSuccessFull");
         }
         String username = jwtToken.getUsernameFromToken(token);
-        User user = userRepository.findByFirstName(username);
+        User user = userRepository.findByEmail(username);
         user.setPassword(encodedPassword);
         User updatedUser = userRepository.save(user);
         if (updatedUser.getPassword().equalsIgnoreCase(encodedPassword))
