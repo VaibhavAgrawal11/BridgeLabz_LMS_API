@@ -24,11 +24,17 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private Token token;
 
-    /*
-    * Checks if any incoming request has valid token
-    * If valid then set the authentication in the context,
-    * to specify that current user is verified
-    * */
+    /**
+     * Checks if any incoming request has valid token
+     * If valid then set the authentication in the context,
+     * to specify that current user is verified
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 

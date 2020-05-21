@@ -56,9 +56,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return mapper;
     }
 
-    /*
+    /**
      * Configuring the authorities to access the end points of the application
-     * */
+     *
+     * @param httpSecurity
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()

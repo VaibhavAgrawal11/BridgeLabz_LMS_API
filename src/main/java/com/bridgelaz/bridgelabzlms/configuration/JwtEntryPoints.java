@@ -14,9 +14,14 @@ public class JwtEntryPoints implements AuthenticationEntryPoint, Serializable {
 
     private static final long serialVersionUID = 763706453912927477L;
 
-    /*
-    * Rejects every unauthenticated request and sends error
-    * */
+    /**
+     * Rejects every unauthenticated request and sends error
+     *
+     * @param request
+     * @param response
+     * @param authException
+     * @throws IOException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {

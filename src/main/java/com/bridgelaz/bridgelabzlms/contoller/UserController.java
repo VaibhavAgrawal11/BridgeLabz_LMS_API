@@ -13,9 +13,9 @@ import javax.validation.constraints.Email;
 
 @RestController
 @RequestMapping("/user")
-/*
+/**
  *User controller takes service of IUserService interface
- * */
+ */
 public class UserController {
     @Autowired
     private IUserService IUserService;
@@ -25,41 +25,45 @@ public class UserController {
         return "Welcome to Bridgelabz LMS API development project.";
     }
 
-    /*
+    /**
      * Take user details to register in database
-     * @param UserDTO
+     *
+     * @param user
      * @return UserResponse
-     * */
+     */
     @PostMapping(value = "/register")
     public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserDTO user) throws Exception {
         return ResponseEntity.ok(IUserService.save(user));
     }
 
-    /*
+    /**
      * Takes user name and password to login in application
-     * @param LoginRequest
+     *
+     * @param loginRequest
      * @return LoginResponse
-     * */
+     */
     @PostMapping(value = "/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws Exception {
         return IUserService.login(loginRequest);
     }
 
-    /*
+    /**
      * Takes email address from user and sends mail to reset password again
-     * @param email address
+     *
+     * @param emailAddress
      * @return UserResponse
-     * */
+     */
     @GetMapping("/forgotpassword")
     public UserResponse requestResetPassword(@Valid @RequestParam @Email String emailAddress) throws AddressException, MessagingException {
         return IUserService.sentEmail(emailAddress);
     }
 
-    /*
+    /**
      * Takes new password and JWT for user authorization
-     * @param ResentPassword
+     *
+     * @param resetPassword
      * @return UserResponse
-     * */
+     */
     @PutMapping("/resetpassword")
     public UserResponse resetPassword(@Valid @RequestBody ResetPassword resetPassword) {
         return IUserService.resetPassword(resetPassword.getPassword(), resetPassword.getToken());

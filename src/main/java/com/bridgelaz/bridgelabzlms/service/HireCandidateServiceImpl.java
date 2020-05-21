@@ -30,6 +30,12 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
 
     HiredCandidateDTO hiredCandidate = new HiredCandidateDTO();
 
+    /**
+     * Prepare list from excel file
+     *
+     * @param filePath
+     * @return list
+     */
     public List<List<XSSFCell>> getHiredCandidate(String filePath) {
         List<List<XSSFCell>> sheetData = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(filePath)) {
@@ -52,6 +58,11 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         return sheetData;
     }
 
+    /**
+     * Take the sheetData list and drop it in data base
+     *
+     * @param sheetData
+     */
     public void saveCandidateDetails(List<List<XSSFCell>> sheetData) {
         XSSFCell cell;
         for (List<XSSFCell> list : sheetData) {
@@ -97,6 +108,11 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         }
     }
 
+    /**
+     * Display all the hired candidate list
+     *
+     * @return candidateList
+     */
     public List<String> getAllHiredCandidates() {
         List<HiredCandidateModel> list = hiredCandidateRepository.findAll();
         List<String> candidateList = new ArrayList<>();
@@ -116,6 +132,12 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         return new UserResponse(200, "Successfully Noted");
     }
 
+    /**
+     * Take id of candidate and display profile
+     *
+     * @param id
+     * @return hiredCandidateModel
+     */
     @Override
     public Optional<HiredCandidateModel> viewCandidateProfile(Integer id) {
         return hiredCandidateRepository.findById(id);

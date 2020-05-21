@@ -53,9 +53,10 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private Token jwtTokenUtil;
 
-    /*
+    /**
      * This method maps the users details in the the database
-     * @param UserDto
+     *
+     * @param user
      * @return UserResponse
      */
     @Override
@@ -69,9 +70,10 @@ public class UserServiceImpl implements IUserService {
         return new UserResponse(200, "successfully Registered");
     }
 
-    /*
+    /**
      * This method maps the users details in the the inbuilt UserDetails class
-     * @param email id
+     *
+     * @param emailId
      * @return UserDetails
      */
     @Override
@@ -84,11 +86,12 @@ public class UserServiceImpl implements IUserService {
                 new ArrayList<>());
     }
 
-    /*
+    /**
      * Takes email address from user and sends mail to reset password again
-     * @param email address
+     *
+     * @param emailAddress
      * @return UserResponse
-     * */
+     */
     @Override
     public UserResponse sentEmail(String emailAddress) throws MessagingException {
         User user = userRepository.findByEmail(emailAddress);
@@ -103,11 +106,12 @@ public class UserServiceImpl implements IUserService {
         return new UserResponse(200, token);
     }
 
-    /*
+    /**
      * Takes user name and password to login in application
-     * @param LoginRequest
+     *
+     * @param loginRequest
      * @return LoginResponse
-     * */
+     */
     @Override
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) throws Exception {
         try {
@@ -127,11 +131,12 @@ public class UserServiceImpl implements IUserService {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
-    /*
+    /**
      * Takes new password and JWT for user authorization
-     * @param ResentPassword
+     *
+     * @param password
      * @return UserResponse
-     * */
+     */
     @Override
     public UserResponse resetPassword(String password, String token) {
         String encodedPassword = bcryptEncoder.encode(password);
