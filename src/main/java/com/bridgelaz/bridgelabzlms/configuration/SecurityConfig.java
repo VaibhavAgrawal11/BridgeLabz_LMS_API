@@ -64,8 +64,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.csrf().disable()
                 .authorizeRequests().antMatchers("/user/login", "/user/register"
                 , "/user/forgetpassword", "/user/resetpassword"
-                , "/hiredcandidate/takecandidatelist", "/hiredcandidate/allcandidates"
-                , "/hiredcandidate/viewprofile").permitAll().
+                , "/hirecandidate/takecandidatelist", "/hirecandidate/allcandidates"
+                , "/hirecandidate/viewprofile", "/swagger-resources/**"
+                , "/swagger-ui.html", "/v2/api-docs"
+                , "/webjars/**").permitAll().
                 anyRequest().authenticated().and().
                 exceptionHandling().authenticationEntryPoint(jwtEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
