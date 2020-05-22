@@ -2,6 +2,7 @@ package com.bridgelaz.bridgelabzlms.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -14,14 +15,14 @@ public class HiredCandidateDTO {
     private String hiredCity;
     private String degree;
     private Date hiredDate;
-    private String mobileNumber;
-    private String permanentPincode;
+    private Long mobileNumber;
+    private Integer permanentPincode;
     private String hiredLab;
     private String attitude;
     private String communicationRemark;
     private String knowledgeRemark;
     private String aggregateRemark;
     private String status;
-    private Date creatorStamp;
+    private LocalDateTime creatorStamp;
     private String creatorUser;
 }

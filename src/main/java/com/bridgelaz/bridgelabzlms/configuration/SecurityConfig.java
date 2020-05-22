@@ -66,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
                 .authorizeRequests().antMatchers("/user/login", "/user/register"
-                , "/user/forgetpassword", "/user/resetpassword"
+                , "/user/forgotpassword", "/user/resetpassword"
                 , "/hirecandidate/takecandidatelist", "/hirecandidate/allcandidates"
                 , "/hirecandidate/viewprofile", "/swagger-resources/**"
                 , "/swagger-ui.html", "/v2/api-docs"

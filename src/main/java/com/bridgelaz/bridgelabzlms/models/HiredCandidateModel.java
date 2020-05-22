@@ -2,9 +2,8 @@ package com.bridgelaz.bridgelabzlms.models;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Table
@@ -12,6 +11,7 @@ import java.util.Date;
 @Data
 public class HiredCandidateModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String firstName;
     private String middleName;
@@ -20,14 +20,14 @@ public class HiredCandidateModel {
     private String hiredCity;
     private String degree;
     private Date hiredDate;
-    private String mobileNumber;
-    private String permanentPincode;
+    private Long mobileNumber;
+    private Integer permanentPincode;
     private String hiredLab;
     private String attitude;
     private String communicationRemark;
     private String knowledgeRemark;
     private String aggregateRemark;
     private String status;
-    private Date creatorStamp;
+    private LocalDateTime creatorStamp;
     private String creatorUser;
 }

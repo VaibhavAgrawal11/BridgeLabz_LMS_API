@@ -5,6 +5,7 @@ import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
 import com.bridgelaz.bridgelabzlms.service.IHireCandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,9 +28,8 @@ public class HireCandidateController {
      * @return UserResponse
      */
     @PostMapping("/takecandidatelist")
-    public UserResponse importHiredCandidate(@RequestParam String filePath) throws IOException {
+    public UserResponse importHiredCandidate(@RequestParam("file") MultipartFile filePath) throws IOException {
         return hiredCandidateService.dropHireCandidateInDataBase(filePath);
-
     }
 
     /**

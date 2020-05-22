@@ -3,6 +3,7 @@ package com.bridgelaz.bridgelabzlms.service;
 import com.bridgelaz.bridgelabzlms.dto.HiredCandidateDTO;
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
+import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -11,9 +12,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +33,8 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
     @Autowired
     private ModelMapper modelMapper;
 
+    User user = new User();
+
     HiredCandidateDTO hiredCandidate = new HiredCandidateDTO();
 
     /**
@@ -36,9 +43,10 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      * @param filePath
      * @return list
      */
-    public List<List<XSSFCell>> getHiredCandidate(String filePath) {
+    public List<List<XSSFCell>> getHiredCandidate(MultipartFile filePath) {
         List<List<XSSFCell>> sheetData = new ArrayList<>();
-        try (FileInputStream fis = new FileInputStream(filePath)) {
+        try (InputStream fis = filePath.getInputStream()) {
+
             XSSFWorkbook workbook = new XSSFWorkbook(fis);
             XSSFSheet sheet = workbook.getSheetAt(0);
             Iterator rows = sheet.rowIterator();
@@ -65,46 +73,45 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      */
     public void saveCandidateDetails(List<List<XSSFCell>> sheetData) {
         XSSFCell cell;
+        boolean flag = true;
         for (List<XSSFCell> list : sheetData) {
-            int j = 0;
-            cell = list.get(j++);
-            hiredCandidate.setId((int) cell.getNumericCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setFirstName(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setMiddleName(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setLastName(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setEmailId(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setHiredCity(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setDegree(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setHiredDate(cell.getDateCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setMobileNumber(String.valueOf(cell.getNumericCellValue()));
-            cell = list.get(j++);
-            hiredCandidate.setPermanentPincode(String.valueOf(cell.getNumericCellValue()));
-            cell = list.get(j++);
-            hiredCandidate.setHiredLab(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setAttitude(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setCommunicationRemark(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setKnowledgeRemark(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setAggregateRemark(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setStatus(cell.getStringCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setCreatorStamp(cell.getDateCellValue());
-            cell = list.get(j++);
-            hiredCandidate.setCreatorUser(cell.getStringCellValue());
-            HiredCandidateModel hiredCandidateModel = modelMapper.map(hiredCandidate, HiredCandidateModel.class);
-            hiredCandidateRepository.save(hiredCandidateModel);
+            if (!flag) {
+                int j = 0;
+                cell = list.get(j++);
+                hiredCandidate.setFirstName(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setMiddleName(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setLastName(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setEmailId(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setHiredCity(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setDegree(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setHiredDate(cell.getDateCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setMobileNumber((long) cell.getNumericCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setPermanentPincode((int) cell.getNumericCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setHiredLab(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setAttitude(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setCommunicationRemark(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setKnowledgeRemark(cell.getStringCellValue());
+                cell = list.get(j++);
+                hiredCandidate.setAggregateRemark(cell.getStringCellValue());
+                hiredCandidate.setStatus("pending");
+                hiredCandidate.setCreatorStamp(LocalDateTime.now());
+                hiredCandidate.setCreatorUser("Vaibhav");
+                HiredCandidateModel hiredCandidateModel = modelMapper.map(hiredCandidate, HiredCandidateModel.class);
+                hiredCandidateRepository.save(hiredCandidateModel);
+            }
+            flag = false;
         }
     }
 
@@ -126,7 +133,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
     }
 
     @Override
-    public UserResponse dropHireCandidateInDataBase(String filePath) {
+    public UserResponse dropHireCandidateInDataBase(MultipartFile filePath) {
         List<List<XSSFCell>> hiredCandidate = getHiredCandidate(filePath);
         saveCandidateDetails(hiredCandidate);
         return new UserResponse(200, "Successfully Noted");

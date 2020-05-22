@@ -7,7 +7,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Data
-@NotNull
 public class UserDTO {
     @Size(max = 100)
     @Pattern(regexp = "^[A-Z]+[A-Za-z0-9]{1,}$")
