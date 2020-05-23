@@ -65,14 +65,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-                .authorizeRequests().antMatchers("/user/login", "/user/register"
-                , "/user/forgotpassword", "/user/resetpassword"
-                , "/hirecandidate/takecandidatelist", "/hirecandidate/allcandidates"
-                , "/hirecandidate/viewprofile", "/swagger-resources/**"
-                , "/swagger-ui.html", "/v2/api-docs"
-                , "/webjars/**").permitAll().
-                anyRequest().authenticated().and().
-                exceptionHandling().authenticationEntryPoint(jwtEntryPoint).and().sessionManagement()
+                .authorizeRequests()
+                .antMatchers("/user/login"
+                        , "/user/register"
+                        , "/user/forgotpassword"
+                        , "/user/resetpassword"
+                        , "/hirecandidate/updatestatus"
+                        , "/hirecandidate/takecandidatelist"
+                        , "/swagger-resources/**"
+                        , "/swagger-ui.html", "/v2/api-docs"
+                        , "/webjars/**").permitAll()
+                .anyRequest()
+                .authenticated().and()
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtEntryPoint).and()
+                .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
