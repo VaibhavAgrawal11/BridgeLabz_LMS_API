@@ -72,6 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         , "/user/resetpassword"
                         , "/hirecandidate/updatestatus"
                         , "/hirecandidate/takecandidatelist"
+                        , "/fellow/onboard"
                         , "/swagger-resources/**"
                         , "/swagger-ui.html", "/v2/api-docs"
                         , "/webjars/**").permitAll()
