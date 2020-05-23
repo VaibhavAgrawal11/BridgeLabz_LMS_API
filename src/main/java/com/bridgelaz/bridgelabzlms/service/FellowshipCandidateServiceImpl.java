@@ -50,4 +50,14 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         }
         return new UserResponse(200, "Successfully Onboard");
     }
+
+    /**
+     * Return total number of candidates present in database
+     *
+     * @return count of candidates
+     */
+    @Override
+    public int getCandidateCount() {
+        return fellowshipCandidateRepository.findAll().size();
+    }
 }

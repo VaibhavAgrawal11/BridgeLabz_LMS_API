@@ -3,10 +3,7 @@ package com.bridgelaz.bridgelabzlms.contoller;
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IFellowshipCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/fellow")
@@ -23,5 +20,15 @@ public class FellowshipCandidateController {
     @PostMapping("/onboard")
     public UserResponse onboard(@RequestParam String token) {
         return fellowshipCandidateService.onboardAcceptedCandidates(token);
+    }
+
+    /**
+     * Return total number of candidates present in database
+     *
+     * @return count of candidates
+     */
+    @GetMapping("/count")
+    public int getCandidateCount() {
+        return fellowshipCandidateService.getCandidateCount();
     }
 }
