@@ -2,8 +2,8 @@ package com.bridgelaz.bridgelabzlms.service;
 
 import com.bridgelaz.bridgelabzlms.dto.LoginRequest;
 import com.bridgelaz.bridgelabzlms.dto.LoginResponse;
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.dto.UserDTO;
+import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
 import com.bridgelaz.bridgelabzlms.util.Token;
@@ -82,7 +82,7 @@ public class UserServiceImpl implements IUserService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + emailId);
         }
-        return new org.springframework.security.core.userdetails.User(user.getFirstName(), user.getPassword(),
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
                 new ArrayList<>());
     }
 
@@ -95,7 +95,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public UserResponse sentEmail(String emailAddress) throws MessagingException {
         User user = userRepository.findByEmail(emailAddress);
-        final String token = jwtToken.generatePasswordResetToken(String.valueOf(user.getId()));
+        final String token = jwtToken.generatePasswordResetToken(String.valueOf(user.getEmail()));
         String recipientAddress = user.getEmail();
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);

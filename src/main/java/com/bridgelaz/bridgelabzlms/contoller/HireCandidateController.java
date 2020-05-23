@@ -28,8 +28,9 @@ public class HireCandidateController {
      * @return UserResponse
      */
     @PostMapping("/takecandidatelist")
-    public UserResponse importHiredCandidate(@RequestParam("file") MultipartFile filePath) throws IOException {
-        return hiredCandidateService.dropHireCandidateInDataBase(filePath);
+    public UserResponse importHiredCandidate(@RequestParam("file") MultipartFile filePath,
+                                             @RequestParam String token) throws IOException {
+        return hiredCandidateService.dropHireCandidateInDataBase(filePath,token);
     }
 
     /**
@@ -49,5 +50,11 @@ public class HireCandidateController {
     @GetMapping("/viewprofile")
     public Optional<HiredCandidateModel> viewCandidateProfile(@RequestParam int id) throws IOException {
         return hiredCandidateService.viewCandidateProfile(id);
+    }
+
+    @PutMapping("/updatestatus")
+    public UserResponse update(@RequestParam String candidateResponse,
+                               @RequestParam String emailId) {
+        return hiredCandidateService.updateStatus(candidateResponse, emailId);
     }
 }

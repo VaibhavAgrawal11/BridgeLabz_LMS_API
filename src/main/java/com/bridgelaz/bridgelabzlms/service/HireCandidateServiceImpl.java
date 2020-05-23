@@ -5,17 +5,22 @@ import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
 import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
+import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import com.bridgelaz.bridgelabzlms.util.Token;
+import lombok.SneakyThrows;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -33,9 +38,17 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
     @Autowired
     private ModelMapper modelMapper;
 
-    User user = new User();
+    @Autowired
+    private JavaMailSender sender;
+
+    @Autowired
+    private Token jwtToken;
+
+    @Autowired
+    private UserRepository userRepository;
 
     HiredCandidateDTO hiredCandidate = new HiredCandidateDTO();
+
 
     /**
      * Prepare list from excel file
@@ -71,7 +84,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      *
      * @param sheetData
      */
-    public void saveCandidateDetails(List<List<XSSFCell>> sheetData) {
+    public void saveCandidateDetails(List<List<XSSFCell>> sheetData, String token) throws MessagingException {
         XSSFCell cell;
         boolean flag = true;
         for (List<XSSFCell> list : sheetData) {
@@ -107,12 +120,33 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
                 hiredCandidate.setAggregateRemark(cell.getStringCellValue());
                 hiredCandidate.setStatus("pending");
                 hiredCandidate.setCreatorStamp(LocalDateTime.now());
-                hiredCandidate.setCreatorUser("Vaibhav");
+                //Getting user with help of JWT token
+                User user = userRepository.findByEmail(
+                        jwtToken.getUsernameFromToken(token));
+                hiredCandidate.setCreatorUser(user.getCreatorUser());
                 HiredCandidateModel hiredCandidateModel = modelMapper.map(hiredCandidate, HiredCandidateModel.class);
                 hiredCandidateRepository.save(hiredCandidateModel);
+                this.sendSelectionMail(hiredCandidateModel.getEmailId());
             }
             flag = false;
         }
+    }
+
+    /**
+     * @param emailId
+     * @throws MessagingException
+     */
+    private void sendSelectionMail(String emailId) throws MessagingException {
+        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId);
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setTo(emailId);
+        helper.setText("Hello " + hiredCandidateModel.getFirstName() + " " + hiredCandidateModel.getLastName() + "," + "\n\n" +
+                "Congratulations, you are been shortlisted for our fellowship plan." + "\n" +
+                "You need to respond ACCEPTED to continue with fellowship plan" + "\n" +
+                "http://localhost:8081/hirecandidate/updatestatus?candidateResponse=" + null + "&emailId=" + emailId);
+        helper.setSubject("Fellowship Shortlist");
+        sender.send(message);
     }
 
     /**
@@ -132,11 +166,30 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         return candidateList;
     }
 
+    @SneakyThrows
     @Override
-    public UserResponse dropHireCandidateInDataBase(MultipartFile filePath) {
+    public UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token) {
         List<List<XSSFCell>> hiredCandidate = getHiredCandidate(filePath);
-        saveCandidateDetails(hiredCandidate);
+        saveCandidateDetails(hiredCandidate, token);
         return new UserResponse(200, "Successfully Noted");
+    }
+
+    /**
+     * Updates candidate status responded by them
+     *
+     * @param candidateResponse
+     * @param emailId
+     * @return User Response
+     */
+    @Override
+    public UserResponse updateStatus(String candidateResponse, String emailId) {
+        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId);
+        if (candidateResponse.equals("Accepted") || candidateResponse.equals("Rejected")) {
+            hiredCandidateModel.setStatus(candidateResponse);
+            hiredCandidateRepository.save(hiredCandidateModel);
+            return new UserResponse(200, "Successfully Register");
+        }
+        return new UserResponse(500, "Unwanted Response");
     }
 
     /**

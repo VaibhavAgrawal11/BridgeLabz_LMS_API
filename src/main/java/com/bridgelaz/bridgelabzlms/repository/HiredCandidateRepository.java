@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface HiredCandidateRepository extends JpaRepository<HiredCandidateModel, Integer> {
     @Query("select u from Hired_Candidate u where u.id = ?1")
     public Optional<HiredCandidateModel> findById(Integer Id);
+
+    @Query("select u from Hired_Candidate u where u.emailId = ?1")
+    public HiredCandidateModel findByEmailId(String emailId);
 }

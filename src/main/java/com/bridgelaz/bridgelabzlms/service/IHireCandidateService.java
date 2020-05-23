@@ -12,5 +12,7 @@ public interface IHireCandidateService {
 
     List getAllHiredCandidates();
 
-    UserResponse dropHireCandidateInDataBase(MultipartFile filePath);
+    UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token);
+
+    UserResponse updateStatus(String candidateResponse, String emailId);
 }
