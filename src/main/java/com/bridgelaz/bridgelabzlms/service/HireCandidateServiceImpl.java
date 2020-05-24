@@ -32,23 +32,17 @@ import java.util.Optional;
 @Service
 public class HireCandidateServiceImpl implements IHireCandidateService {
 
+    HiredCandidateDTO hiredCandidate = new HiredCandidateDTO();
     @Autowired
     private HiredCandidateRepository hiredCandidateRepository;
-
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private JavaMailSender sender;
-
     @Autowired
     private Token jwtToken;
-
     @Autowired
     private UserRepository userRepository;
-
-    HiredCandidateDTO hiredCandidate = new HiredCandidateDTO();
-
 
     /**
      * Prepare list from excel file

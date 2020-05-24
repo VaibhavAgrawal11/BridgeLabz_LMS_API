@@ -30,7 +30,7 @@ public class HireCandidateController {
     @PostMapping("/takecandidatelist")
     public UserResponse importHiredCandidate(@RequestParam("file") MultipartFile filePath,
                                              @RequestParam String token) throws IOException {
-        return hiredCandidateService.dropHireCandidateInDataBase(filePath,token);
+        return hiredCandidateService.dropHireCandidateInDataBase(filePath, token);
     }
 
     /**

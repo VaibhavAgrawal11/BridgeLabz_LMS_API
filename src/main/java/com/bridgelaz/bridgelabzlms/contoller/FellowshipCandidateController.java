@@ -1,5 +1,6 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
+import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
 import com.bridgelaz.bridgelabzlms.dto.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IFellowshipCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +31,19 @@ public class FellowshipCandidateController {
     @GetMapping("/count")
     public int getCandidateCount() {
         return fellowshipCandidateService.getCandidateCount();
+    }
+
+    /**
+     * Update Candidate bank details
+     *
+     * @param candidateBankDetailsDTO
+     * @param token
+     * @return
+     */
+    @PostMapping("/bankinfo")
+    public UserResponse updateCandidateBankInfo(@RequestBody CandidateBankDetailsDTO candidateBankDetailsDTO,
+                                                @RequestParam String token) {
+        return fellowshipCandidateService
+                .updateCandidateBankInfo(candidateBankDetailsDTO, token);
     }
 }

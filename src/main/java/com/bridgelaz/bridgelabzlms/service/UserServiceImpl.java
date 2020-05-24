@@ -30,23 +30,17 @@ import java.util.ArrayList;
 @Service
 public class UserServiceImpl implements IUserService {
     @Autowired
+    EntityManager entityManager;
+    @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private PasswordEncoder bcryptEncoder;
-
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private JavaMailSender sender;
-
     @Autowired
     private Token jwtToken;
-
-    @Autowired
-    EntityManager entityManager;
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
