@@ -2,17 +2,16 @@ package com.bridgelaz.bridgelabzlms.models;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Table
+@Table()
 @Entity(name = "FellowshipCandidate")
 @Data
 public class FellowshipCandidateModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String firstName;
     private String middleName;
@@ -30,4 +29,5 @@ public class FellowshipCandidateModel {
     private String aggregateRemark;
     private LocalDateTime creatorStamp;
     private String creatorUser;
+    private String bankInformation;
 }
