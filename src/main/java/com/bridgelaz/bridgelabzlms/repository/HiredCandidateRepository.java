@@ -13,5 +13,5 @@ public interface HiredCandidateRepository extends JpaRepository<HiredCandidateMo
     public Optional<HiredCandidateModel> findById(Integer Id);
 
     @Query("select u from Hired_Candidate u where u.emailId = ?1")
-    public HiredCandidateModel findByEmailId(String emailId);
+    public Optional<HiredCandidateModel> findByEmailId(String emailId);
 }
