@@ -1,18 +1,18 @@
 package com.bridgelaz.bridgelabzlms.service;
 
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
-import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.util.List;
-import java.util.Optional;
 
 public interface IHireCandidateService {
-    Optional<HiredCandidateModel> viewCandidateProfile(Integer id);
+    UserResponse viewCandidateProfile(Integer id) throws CustomServiceException;
 
-    List getAllHiredCandidates();
+    List getAllHiredCandidates() throws CustomServiceException;
 
-    UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token);
+    UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token) throws MessagingException, CustomServiceException;
 
-    UserResponse updateStatus(String candidateResponse, String emailId);
+    UserResponse updateStatus(String candidateResponse, String emailId) throws CustomServiceException;
 }

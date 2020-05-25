@@ -1,13 +1,14 @@
 package com.bridgelaz.bridgelabzlms.service;
 
+import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.HiredCandidateDTO;
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
 import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
-import lombok.SneakyThrows;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -27,7 +28,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
+
+import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.*;
 
 @Service
 public class HireCandidateServiceImpl implements IHireCandidateService {
@@ -78,7 +80,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      *
      * @param sheetData
      */
-    public void saveCandidateDetails(List<List<XSSFCell>> sheetData, String token) throws MessagingException {
+    public void saveCandidateDetails(List<List<XSSFCell>> sheetData, String token) throws MessagingException, CustomServiceException {
         XSSFCell cell;
         boolean flag = true;
         for (List<XSSFCell> list : sheetData) {
@@ -116,9 +118,12 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
                 hiredCandidate.setCreatorStamp(LocalDateTime.now());
                 //Getting user with help of JWT token
                 User user = userRepository.findByEmail(
-                        jwtToken.getUsernameFromToken(token));
+                        jwtToken.getUsernameFromToken(token)).get();
                 hiredCandidate.setCreatorUser(user.getCreatorUser());
                 HiredCandidateModel hiredCandidateModel = modelMapper.map(hiredCandidate, HiredCandidateModel.class);
+                if (hiredCandidateModel == null)
+                    throw new CustomServiceException(DATA_NOT_FOUND, "Null Values found");
+                hiredCandidateRepository.save(hiredCandidateModel);
                 hiredCandidateRepository.save(hiredCandidateModel);
                 this.sendSelectionMail(hiredCandidateModel.getEmailId());
             }
@@ -130,8 +135,11 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      * @param emailId
      * @throws MessagingException
      */
-    private void sendSelectionMail(String emailId) throws MessagingException {
-        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId);
+    private void sendSelectionMail(String emailId) throws MessagingException, CustomServiceException {
+        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId)
+                .orElseThrow(
+                        () -> new CustomServiceException(INVALID_EMAIL_ID, "No such id exist in data base.")
+                );
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setTo(emailId);
@@ -148,8 +156,10 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      *
      * @return candidateList
      */
-    public List<String> getAllHiredCandidates() {
+    public List<String> getAllHiredCandidates() throws CustomServiceException {
         List<HiredCandidateModel> list = hiredCandidateRepository.findAll();
+        if (list == null)
+            throw new CustomServiceException(DATA_NOT_FOUND, "Null Values found");
         List<String> candidateList = new ArrayList<>();
         for (HiredCandidateModel hiredCandidateModel : list) {
             candidateList.add((Integer) hiredCandidateModel.getId() + " " + "--->"
@@ -160,12 +170,12 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
         return candidateList;
     }
 
-    @SneakyThrows
     @Override
-    public UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token) {
+    public UserResponse dropHireCandidateInDataBase(MultipartFile filePath, String token) throws MessagingException, CustomServiceException {
         List<List<XSSFCell>> hiredCandidate = getHiredCandidate(filePath);
         saveCandidateDetails(hiredCandidate, token);
-        return new UserResponse(200, "Successfully Noted");
+        return new UserResponse(filePath
+                , ApplicationConfiguration.getMessageAccessor().getMessage("107"));
     }
 
     /**
@@ -176,14 +186,19 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      * @return User Response
      */
     @Override
-    public UserResponse updateStatus(String candidateResponse, String emailId) {
-        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId);
+    public UserResponse updateStatus(String candidateResponse, String emailId) throws CustomServiceException {
+        HiredCandidateModel hiredCandidateModel = hiredCandidateRepository.findByEmailId(emailId)
+                .orElseThrow(
+                        () -> new CustomServiceException(INVALID_EMAIL_ID, "No such id exist in data base.")
+                );
         if (candidateResponse.equals("Accepted") || candidateResponse.equals("Rejected")) {
             hiredCandidateModel.setStatus(candidateResponse);
             hiredCandidateRepository.save(hiredCandidateModel);
-            return new UserResponse(200, "Successfully Register");
+            return new UserResponse(hiredCandidateModel,
+                    ApplicationConfiguration.getMessageAccessor().getMessage("108"));
         }
-        return new UserResponse(500, "Unwanted Response");
+        return new UserResponse(hiredCandidateModel
+                , ApplicationConfiguration.getMessageAccessor().getMessage("109"));
     }
 
     /**
@@ -193,7 +208,11 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
      * @return hiredCandidateModel
      */
     @Override
-    public Optional<HiredCandidateModel> viewCandidateProfile(Integer id) {
-        return hiredCandidateRepository.findById(id);
+    public UserResponse viewCandidateProfile(Integer id) throws CustomServiceException {
+        return new UserResponse(hiredCandidateRepository.findById(id)
+                .orElseThrow(
+                        () -> new CustomServiceException(INVALID_ID, "No such id found")
+                )
+                , ApplicationConfiguration.getMessageAccessor().getMessage("105"));
     }
 }

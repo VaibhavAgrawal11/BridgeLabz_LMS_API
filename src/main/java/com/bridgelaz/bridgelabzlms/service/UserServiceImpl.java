@@ -1,12 +1,15 @@
 package com.bridgelaz.bridgelabzlms.service;
 
-import com.bridgelaz.bridgelabzlms.dto.LoginRequest;
-import com.bridgelaz.bridgelabzlms.dto.LoginResponse;
+import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.UserDTO;
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import com.bridgelaz.bridgelabzlms.request.LoginRequest;
+import com.bridgelaz.bridgelabzlms.response.LoginResponse;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
+import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,8 @@ import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.*;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -61,7 +66,8 @@ public class UserServiceImpl implements IUserService {
         newUser.setCreatorUser(newUser.getFirstName());
         newUser.setVerified("yes");
         userRepository.save(newUser);
-        return new UserResponse(200, "successfully Registered");
+        return new UserResponse(newUser
+                , ApplicationConfiguration.getMessageAccessor().getMessage("101"));
     }
 
     /**
@@ -70,12 +76,12 @@ public class UserServiceImpl implements IUserService {
      * @param emailId
      * @return UserDetails
      */
+    @SneakyThrows
     @Override
     public UserDetails loadUserByUsername(String emailId) throws UsernameNotFoundException {
-        User user = (User) userRepository.findByEmail(emailId);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + emailId);
-        }
+        User user = userRepository.findByEmail(emailId).orElseThrow(
+                () -> new CustomServiceException(NO_SUCH_USER, "Invalid user")
+        );
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
                 new ArrayList<>());
     }
@@ -87,8 +93,10 @@ public class UserServiceImpl implements IUserService {
      * @return UserResponse
      */
     @Override
-    public UserResponse sentEmail(String emailAddress) throws MessagingException {
-        User user = userRepository.findByEmail(emailAddress);
+    public UserResponse sentEmail(String emailAddress) throws MessagingException, CustomServiceException {
+        User user = userRepository.findByEmail(emailAddress).orElseThrow(
+                () -> new CustomServiceException
+                        (INVALID_EMAIL_ID, "User not found with email"));
         final String token = jwtToken.generatePasswordResetToken(String.valueOf(user.getEmail()));
         String recipientAddress = user.getEmail();
         MimeMessage message = sender.createMimeMessage();
@@ -97,7 +105,8 @@ public class UserServiceImpl implements IUserService {
         helper.setText("Hii " + user.getFirstName() + "\n" + " You requested to reset password, if YES then click on link put your new password and NO then ignore");
         helper.setSubject("Password-Reset-Request");
         sender.send(message);
-        return new UserResponse(200, token);
+        return new UserResponse(token
+                , ApplicationConfiguration.getMessageAccessor().getMessage("103"));
     }
 
     /**
@@ -113,16 +122,17 @@ public class UserServiceImpl implements IUserService {
                     (new UsernamePasswordAuthenticationToken(loginRequest.getEmailId(),
                             loginRequest.getPassword()));
         } catch (DisabledException e) {
-            throw new Exception("USER_DISABLED", e);
+            throw new CustomServiceException(USER_DISABLED, e.getMessage());
         } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
+            throw new CustomServiceException(INVALID_CREDENTIALS, e.getMessage());
         }
 
         final UserDetails userDetails = this.loadUserByUsername(loginRequest.getEmailId());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new LoginResponse(token
+                , ApplicationConfiguration.getMessageAccessor().getMessage("102")));
     }
 
     /**
@@ -132,17 +142,22 @@ public class UserServiceImpl implements IUserService {
      * @return UserResponse
      */
     @Override
-    public UserResponse resetPassword(String password, String token) {
+    public UserResponse resetPassword(String password, String token) throws CustomServiceException {
         String encodedPassword = bcryptEncoder.encode(password);
         if (jwtToken.isTokenExpired(token)) {
-            return new UserResponse(500, "UnSuccessFull");
+            throw new CustomServiceException(INVALID_TOKEN, "Token has Expired");
         }
         String username = jwtToken.getUsernameFromToken(token);
-        User user = userRepository.findByEmail(username);
-        user.setPassword(encodedPassword);
-        User updatedUser = userRepository.save(user);
-        if (updatedUser.getPassword().equalsIgnoreCase(encodedPassword))
-            return new UserResponse(200, "Successfully updated");
-        return new UserResponse(500, "UnSuccessFull");
+        User user = userRepository.findByEmail(username)
+                .map(user1 -> {
+                            user1.setPassword(encodedPassword);
+                            return user1;
+                        }
+                ).map(userRepository::save).get();
+        if (user.getPassword().equalsIgnoreCase(encodedPassword))
+            return new UserResponse(user
+                    , ApplicationConfiguration.getMessageAccessor().getMessage("104"));
+        return new UserResponse(user
+                , ApplicationConfiguration.getMessageAccessor().getMessage("106"));
     }
 }

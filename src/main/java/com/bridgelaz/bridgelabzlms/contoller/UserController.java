@@ -1,8 +1,14 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
-import com.bridgelaz.bridgelabzlms.dto.*;
+import com.bridgelaz.bridgelabzlms.dto.ResetPassword;
+import com.bridgelaz.bridgelabzlms.dto.UserDTO;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
+import com.bridgelaz.bridgelabzlms.request.LoginRequest;
+import com.bridgelaz.bridgelabzlms.response.LoginResponse;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +36,11 @@ public class UserController {
      *
      * @param user
      * @return UserResponse
+     * @throws Exception
      */
     @PostMapping(value = "/register")
     public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserDTO user) throws Exception {
-        return ResponseEntity.ok(IUserService.save(user));
+        return new ResponseEntity<>(IUserService.save(user), HttpStatus.CREATED);
     }
 
     /**
@@ -44,7 +51,7 @@ public class UserController {
      */
     @PostMapping(value = "/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws Exception {
-        return IUserService.login(loginRequest);
+        return new ResponseEntity(IUserService.login(loginRequest), HttpStatus.OK);
     }
 
     /**
@@ -54,8 +61,8 @@ public class UserController {
      * @return UserResponse
      */
     @GetMapping("/forgotpassword")
-    public UserResponse requestResetPassword(@Valid @RequestParam @Email String emailAddress) throws AddressException, MessagingException {
-        return IUserService.sentEmail(emailAddress);
+    public ResponseEntity<UserResponse> requestResetPassword(@Valid @RequestParam @Email String emailAddress) throws AddressException, MessagingException, CustomServiceException {
+        return new ResponseEntity<>(IUserService.sentEmail(emailAddress), HttpStatus.ACCEPTED);
     }
 
     /**
@@ -65,7 +72,8 @@ public class UserController {
      * @return UserResponse
      */
     @PutMapping("/resetpassword")
-    public UserResponse resetPassword(@Valid @RequestBody ResetPassword resetPassword) {
-        return IUserService.resetPassword(resetPassword.getPassword(), resetPassword.getToken());
+    public ResponseEntity<UserResponse> resetPassword(@Valid @RequestBody ResetPassword resetPassword) throws CustomServiceException {
+        return new ResponseEntity<>(IUserService.resetPassword(resetPassword.getPassword(), resetPassword.getToken())
+                , HttpStatus.ACCEPTED);
     }
 }

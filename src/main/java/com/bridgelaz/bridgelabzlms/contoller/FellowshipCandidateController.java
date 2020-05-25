@@ -1,9 +1,12 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IFellowshipCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +22,9 @@ public class FellowshipCandidateController {
      * @return user response
      */
     @PostMapping("/onboard")
-    public UserResponse onboard(@RequestParam String token) {
-        return fellowshipCandidateService.onboardAcceptedCandidates(token);
+    public ResponseEntity<UserResponse> onboard(@RequestParam String token) {
+        return new ResponseEntity<>(fellowshipCandidateService.onboardAcceptedCandidates(token)
+                , HttpStatus.MULTI_STATUS);
     }
 
     /**
@@ -29,8 +33,10 @@ public class FellowshipCandidateController {
      * @return count of candidates
      */
     @GetMapping("/count")
-    public int getCandidateCount() {
-        return fellowshipCandidateService.getCandidateCount();
+    public ResponseEntity<Integer> getCandidateCount() {
+
+        return new ResponseEntity<>(fellowshipCandidateService.getCandidateCount()
+                , HttpStatus.OK);
     }
 
     /**
@@ -41,9 +47,10 @@ public class FellowshipCandidateController {
      * @return
      */
     @PostMapping("/bankinfo")
-    public UserResponse updateCandidateBankInfo(@RequestBody CandidateBankDetailsDTO candidateBankDetailsDTO,
-                                                @RequestParam String token) {
-        return fellowshipCandidateService
-                .updateCandidateBankInfo(candidateBankDetailsDTO, token);
+    public ResponseEntity<UserResponse> updateCandidateBankInfo(@RequestBody CandidateBankDetailsDTO candidateBankDetailsDTO,
+                                                                @RequestParam String token) throws CustomServiceException {
+        return new ResponseEntity<>(fellowshipCandidateService
+                .updateCandidateBankInfo(candidateBankDetailsDTO, token)
+                , HttpStatus.CREATED);
     }
 }

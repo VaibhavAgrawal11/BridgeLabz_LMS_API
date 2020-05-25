@@ -1,7 +1,8 @@
 package com.bridgelaz.bridgelabzlms.service;
 
+import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.CandidateBankDetailsModel;
 import com.bridgelaz.bridgelabzlms.models.FellowshipCandidateModel;
 import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
@@ -10,6 +11,7 @@ import com.bridgelaz.bridgelabzlms.repository.CandidateBankDetailsRepository;
 import com.bridgelaz.bridgelabzlms.repository.FellowshipCandidateRepository;
 import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.INVALID_ID;
 
 @Service
 public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
@@ -43,7 +47,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Override
     public UserResponse onboardAcceptedCandidates(String token) {
         List<HiredCandidateModel> candidates = hiredCandidateRepository.findAll();
-        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token));
+        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         for (HiredCandidateModel candidate : candidates) {
             if (candidate.getStatus().equals("Accepted")) {
                 FellowshipCandidateModel fellowshipCandidate = modelMapper
@@ -54,7 +58,8 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
                 fellowshipCandidateRepository.save(fellowshipCandidate);
             }
         }
-        return new UserResponse(200, "Successfully Onboard");
+        return new UserResponse(true
+                , ApplicationConfiguration.getMessageAccessor().getMessage("110"));
     }
 
     /**
@@ -75,7 +80,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
      * @return
      */
     @Override
-    public UserResponse updateCandidateBankInfo(CandidateBankDetailsDTO candidateBankDetailsDTO, String token) {
+    public UserResponse updateCandidateBankInfo(CandidateBankDetailsDTO candidateBankDetailsDTO, String token) throws CustomServiceException {
         CandidateBankDetailsModel candidateBankDetailsModel =
                 modelMapper.map(candidateBankDetailsDTO, CandidateBankDetailsModel.class);
         candidateBankDetailsModel.setIsAadharNumberVerified("No");
@@ -83,15 +88,17 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         candidateBankDetailsModel.setIsPanNumberVerified("No");
         candidateBankDetailsModel.setIsIsfcCodeVerified("No");
         candidateBankDetailsModel.setCreatorStamp(LocalDateTime.now());
-        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token));
+        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         candidateBankDetailsModel.setCreatorUser(user.getCreatorUser());
         bankDetailsRepository.save(candidateBankDetailsModel);
 
-        //Set bamk info status as updated
+        //Set bank info status as updated
         FellowshipCandidateModel model = fellowshipCandidateRepository
-                .findById(candidateBankDetailsModel.getCandidateId());
+                .findById(candidateBankDetailsModel.getCandidateId())
+                .orElseThrow(() -> new CustomServiceException(INVALID_ID, "No such id present"));
         model.setBankInformation("Updated");
         fellowshipCandidateRepository.save(model);
-        return new UserResponse(200, "Successfully updated bank info");
+        return new UserResponse(bankDetailsRepository
+                , ApplicationConfiguration.getMessageAccessor().getMessage("111"));
     }
 }

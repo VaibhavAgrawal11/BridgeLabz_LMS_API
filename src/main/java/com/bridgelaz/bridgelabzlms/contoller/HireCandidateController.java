@@ -1,15 +1,16 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
-import com.bridgelaz.bridgelabzlms.dto.UserResponse;
-import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
+import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
+import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IHireCandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import javax.mail.MessagingException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/hirecandidate")
@@ -25,20 +26,28 @@ public class HireCandidateController {
      * Take excel sheet of candidates and drop the list database
      *
      * @param filePath
+     * @param token
      * @return UserResponse
+     * @throws MessagingException
+     * @throws CustomServiceException
      */
     @PostMapping("/takecandidatelist")
-    public UserResponse importHiredCandidate(@RequestParam("file") MultipartFile filePath,
-                                             @RequestParam String token) throws IOException {
-        return hiredCandidateService.dropHireCandidateInDataBase(filePath, token);
+    public ResponseEntity<UserResponse> importHiredCandidate(@RequestParam("file") MultipartFile filePath,
+                                                             @RequestParam String token) throws MessagingException, CustomServiceException {
+        return new ResponseEntity<>(hiredCandidateService.dropHireCandidateInDataBase(filePath, token)
+                , HttpStatus.CREATED);
     }
 
     /**
      * Returns list of candidate names
+     *
+     * @return
+     * @throws CustomServiceException
      */
     @GetMapping("/allcandidates")
-    public List getAllHiredCandidate() throws IOException {
-        return hiredCandidateService.getAllHiredCandidates();
+    public ResponseEntity<List> getAllHiredCandidate() throws CustomServiceException {
+        return new ResponseEntity<>(hiredCandidateService.getAllHiredCandidates()
+                , HttpStatus.MULTI_STATUS);
     }
 
     /**
@@ -48,13 +57,22 @@ public class HireCandidateController {
      * @return HireCandidateModel
      */
     @GetMapping("/viewprofile")
-    public Optional<HiredCandidateModel> viewCandidateProfile(@RequestParam int id) throws IOException {
-        return hiredCandidateService.viewCandidateProfile(id);
+    public ResponseEntity<UserResponse> viewCandidateProfile(@RequestParam int id) throws CustomServiceException {
+        return new ResponseEntity<>(hiredCandidateService.viewCandidateProfile(id), HttpStatus.OK);
     }
 
+    /**
+     * Update status of candidate table
+     *
+     * @param candidateResponse
+     * @param emailId
+     * @return UserResponse
+     * @throws CustomServiceException
+     */
     @PutMapping("/updatestatus")
-    public UserResponse update(@RequestParam String candidateResponse,
-                               @RequestParam String emailId) {
-        return hiredCandidateService.updateStatus(candidateResponse, emailId);
+    public ResponseEntity<UserResponse> update(@RequestParam String candidateResponse,
+                                               @RequestParam String emailId) throws CustomServiceException {
+        return new ResponseEntity<>(hiredCandidateService.updateStatus(candidateResponse, emailId)
+                , HttpStatus.OK);
     }
 }
