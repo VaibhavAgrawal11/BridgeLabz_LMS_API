@@ -1,4 +1,4 @@
-package com.bridgelaz.bridgelabzlms.dto;
+package com.bridgelaz.bridgelabzlms.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
