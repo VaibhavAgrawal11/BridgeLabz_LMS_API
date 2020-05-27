@@ -39,4 +39,5 @@ public class FellowshipCandidateModel {
     private LocalDateTime creatorStamp;
     private String creatorUser;
     private String bankInformation;
+    private String educationalInformation;
 }
