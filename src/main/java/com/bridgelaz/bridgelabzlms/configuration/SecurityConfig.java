@@ -74,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         , "/hirecandidate/takecandidatelist"
                         , "/fellow/onboard"
                         , "/fellow/bankinfo"
+                        , "/fellow/eduinfo"
                         , "/swagger-resources/**"
                         , "/swagger-ui.html", "/v2/api-docs"
                         , "/webjars/**").permitAll()
