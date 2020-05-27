@@ -1,6 +1,7 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
+import com.bridgelaz.bridgelabzlms.dto.EducationalInfoDTO;
 import com.bridgelaz.bridgelabzlms.dto.PersonalDetailsDTO;
 import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
@@ -50,7 +51,8 @@ public class FellowshipCandidateController {
      */
     @PostMapping("/job")
     public ResponseEntity<UserResponse> sendJobNotification() throws MessagingException {
-        return new ResponseEntity<>(fellowshipCandidateService.notifyCandidate(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(fellowshipCandidateService.notifyCandidate()
+                , HttpStatus.ACCEPTED);
     }
 
     /**
@@ -76,11 +78,24 @@ public class FellowshipCandidateController {
      * @return
      */
     @PostMapping("/bankinfo")
-
     public ResponseEntity<UserResponse> updateCandidateBankInfo(@RequestBody CandidateBankDetailsDTO candidateBankDetailsDTO,
                                                                 @RequestParam String token) throws CustomServiceException {
-        return new ResponseEntity<>(fellowshipCandidateService
-                .updateCandidateBankInfo(candidateBankDetailsDTO, token)
+        return new ResponseEntity<>(fellowshipCandidateService.updateCandidateBankInfo(candidateBankDetailsDTO, token)
+                , HttpStatus.CREATED);
+    }
+
+    /**
+     * Update candidate educational details
+     *
+     * @param educationalInfo
+     * @param token
+     * @return UserResponse
+     * @throws CustomServiceException
+     */
+    @PostMapping("/eduinfo")
+    public ResponseEntity<UserResponse> updateCandidateEducationalInfo(@RequestBody EducationalInfoDTO educationalInfo,
+                                                                       @RequestParam String token) throws CustomServiceException {
+        return new ResponseEntity<>(fellowshipCandidateService.updateCandidateEducationalInfo(educationalInfo, token)
                 , HttpStatus.CREATED);
     }
 }

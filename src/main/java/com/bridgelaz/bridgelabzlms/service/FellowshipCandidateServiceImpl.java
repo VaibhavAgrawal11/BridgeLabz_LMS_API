@@ -2,16 +2,11 @@ package com.bridgelaz.bridgelabzlms.service;
 
 import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
+import com.bridgelaz.bridgelabzlms.dto.EducationalInfoDTO;
 import com.bridgelaz.bridgelabzlms.dto.PersonalDetailsDTO;
 import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
-import com.bridgelaz.bridgelabzlms.models.CandidateBankDetailsModel;
-import com.bridgelaz.bridgelabzlms.models.FellowshipCandidateModel;
-import com.bridgelaz.bridgelabzlms.models.HiredCandidateModel;
-import com.bridgelaz.bridgelabzlms.models.User;
-import com.bridgelaz.bridgelabzlms.repository.CandidateBankDetailsRepository;
-import com.bridgelaz.bridgelabzlms.repository.FellowshipCandidateRepository;
-import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
-import com.bridgelaz.bridgelabzlms.repository.UserRepository;
+import com.bridgelaz.bridgelabzlms.models.*;
+import com.bridgelaz.bridgelabzlms.repository.*;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.modelmapper.ModelMapper;
@@ -40,6 +35,8 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Autowired
     CandidateBankDetailsRepository bankDetailsRepository;
     @Autowired
+    EducationalInfoRepository educationalInfoRepository;
+    @Autowired
     Token jwtToken;
     @Autowired
     JavaMailSender sender;
@@ -62,6 +59,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
                 fellowshipCandidate.setCreatorUser(user.getCreatorUser());
                 fellowshipCandidate.setCreatorStamp(LocalDateTime.now());
                 fellowshipCandidate.setBankInformation("Pending");
+                fellowshipCandidate.setEducationalInformation("Pending");
                 fellowshipCandidateRepository.save(fellowshipCandidate);
             }
         }
@@ -149,5 +147,35 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         fellowshipCandidateRepository.save(candidateModel);
         //Displaying the updated changes
         return new UserResponse(candidateModel, ApplicationConfiguration.getMessageAccessor().getMessage("113"));
+    }
+
+    /**
+     * Update candidate bank details
+     *
+     * @param educationalInfo
+     * @param token
+     * @return UserResponse
+     * @throws CustomServiceException
+     */
+    @Override
+    public UserResponse updateCandidateEducationalInfo(EducationalInfoDTO educationalInfo, String token) throws CustomServiceException {
+        FellowshipCandidateModel candidateModel = fellowshipCandidateRepository.findById(educationalInfo
+                .getCandidateId())
+                .orElseThrow(() -> new CustomServiceException(INVALID_ID, "Invalid candidate id"));
+        EducationalInfoModel educationalInfoModel = modelMapper.map(educationalInfo, EducationalInfoModel.class);
+        educationalInfoModel.setIsDegreeNameVerified("No");
+        educationalInfoModel.setIsEmployeeDisciplineVerified("No");
+        educationalInfoModel.setIsFinalYearPerVerified("No");
+        educationalInfoModel.setIsOtherTrainingVerified("No");
+        educationalInfoModel.setIsPassingYearVerified("No");
+        educationalInfoModel.setIsTrainingDurationMonthVerified("No");
+        educationalInfoModel.setIsTrainingInstituteVerified("No");
+        educationalInfoModel.setCreatorStamp(LocalDateTime.now());
+        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
+        educationalInfoModel.setCreatorUser(user.getCreatorUser());
+        educationalInfoRepository.save(educationalInfoModel);
+        candidateModel.setEducationalInformation("Updated");
+        fellowshipCandidateRepository.save(candidateModel);
+        return new UserResponse(educationalInfoModel, ApplicationConfiguration.getMessageAccessor().getMessage("114"));
     }
 }
