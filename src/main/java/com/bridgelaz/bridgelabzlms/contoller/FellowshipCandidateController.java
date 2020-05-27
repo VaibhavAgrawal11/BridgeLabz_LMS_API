@@ -1,6 +1,7 @@
 package com.bridgelaz.bridgelabzlms.contoller;
 
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
+import com.bridgelaz.bridgelabzlms.dto.PersonalDetailsDTO;
 import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IFellowshipCandidate;
@@ -53,6 +54,21 @@ public class FellowshipCandidateController {
     }
 
     /**
+     * Updates candidate personal information
+     *
+     * @param detailsDTO
+     * @param id
+     * @return UserResponse
+     * @throws CustomServiceException
+     */
+    @PutMapping("/personalinfo/{id}")
+    public ResponseEntity<UserResponse> updateCandidatePersonalInfo(@RequestBody PersonalDetailsDTO detailsDTO,
+                                                                    @PathVariable("id") int id) throws CustomServiceException {
+        return new ResponseEntity<>(fellowshipCandidateService.updateCandidatePersonalInfo(detailsDTO, id)
+                , HttpStatus.CREATED);
+    }
+
+    /**
      * Update Candidate bank details
      *
      * @param candidateBankDetailsDTO
@@ -60,6 +76,7 @@ public class FellowshipCandidateController {
      * @return
      */
     @PostMapping("/bankinfo")
+
     public ResponseEntity<UserResponse> updateCandidateBankInfo(@RequestBody CandidateBankDetailsDTO candidateBankDetailsDTO,
                                                                 @RequestParam String token) throws CustomServiceException {
         return new ResponseEntity<>(fellowshipCandidateService

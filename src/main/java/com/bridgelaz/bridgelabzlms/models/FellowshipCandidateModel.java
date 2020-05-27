@@ -22,6 +22,15 @@ public class FellowshipCandidateModel {
     private Date hiredDate;
     private Long mobileNumber;
     private Integer permanentPincode;
+    private Date birthDate;
+    private String isBirthDateVerified;
+    private String parentName;
+    private String parentsOccupation;
+    private Long parentsMobileNumber;
+    private Double parentsAnnualSalary;
+    private String localAddress;
+    private String permanentAddress;
+    private String photoPath;
     private String hiredLab;
     private String attitude;
     private String communicationRemark;

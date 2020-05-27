@@ -2,6 +2,7 @@ package com.bridgelaz.bridgelabzlms.service;
 
 import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
+import com.bridgelaz.bridgelabzlms.dto.PersonalDetailsDTO;
 import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.CandidateBankDetailsModel;
 import com.bridgelaz.bridgelabzlms.models.FellowshipCandidateModel;
@@ -129,5 +130,24 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
             sender.send(message);
         }
         return new UserResponse(true, ApplicationConfiguration.getMessageAccessor().getMessage("112"));
+    }
+
+    /**
+     * Updates candidate personal information
+     *
+     * @param personalDetails
+     * @param candidateId
+     * @return UserResponse
+     * @throws CustomServiceException
+     */
+    @Override
+    public UserResponse updateCandidatePersonalInfo(PersonalDetailsDTO personalDetails, int candidateId) throws CustomServiceException {
+        FellowshipCandidateModel candidateModel = fellowshipCandidateRepository.findById(candidateId)
+                .orElseThrow(() -> new CustomServiceException(INVALID_ID, "Id is not present in data base."));
+        modelMapper.map(personalDetails, candidateModel);
+        candidateModel.setIsBirthDateVerified("No");
+        fellowshipCandidateRepository.save(candidateModel);
+        //Displaying the updated changes
+        return new UserResponse(candidateModel, ApplicationConfiguration.getMessageAccessor().getMessage("113"));
     }
 }
