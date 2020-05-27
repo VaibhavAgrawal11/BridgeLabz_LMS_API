@@ -15,8 +15,12 @@ import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +40,8 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     CandidateBankDetailsRepository bankDetailsRepository;
     @Autowired
     Token jwtToken;
+    @Autowired
+    JavaMailSender sender;
 
     /**
      * Take data from hire candidate table and drop in fellowship candidate table
@@ -100,5 +106,28 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         fellowshipCandidateRepository.save(model);
         return new UserResponse(bankDetailsRepository
                 , ApplicationConfiguration.getMessageAccessor().getMessage("111"));
+    }
+
+    /**
+     * Send jo offer notification to all fellowship students
+     *
+     * @return
+     * @throws MessagingException
+     */
+    @Override
+    public UserResponse notifyCandidate() throws MessagingException {
+        List<FellowshipCandidateModel> fellowshipCandidateList = fellowshipCandidateRepository.findAll();
+        for (FellowshipCandidateModel candidate : fellowshipCandidateList) {
+            String emailId = candidate.getEmailId();
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+            helper.setTo(emailId);
+            helper.setText("Hello " + candidate.getFirstName() + " " + candidate.getLastName() + "," + "\n\n" +
+                    "Congratulations, you have accepted our 4 months fellowship course," +
+                    "\n This is the job notification mail");
+            helper.setSubject("Job Offer Notification");
+            sender.send(message);
+        }
+        return new UserResponse(true, ApplicationConfiguration.getMessageAccessor().getMessage("112"));
     }
 }

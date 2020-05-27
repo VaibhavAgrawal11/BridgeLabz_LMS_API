@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+
 @RestController
 @RequestMapping("/fellow")
 public class FellowshipCandidateController {
@@ -37,6 +39,17 @@ public class FellowshipCandidateController {
 
         return new ResponseEntity<>(fellowshipCandidateService.getCandidateCount()
                 , HttpStatus.OK);
+    }
+
+    /**
+     * Send jo offer notification to all fellowship students
+     *
+     * @return UserResponse
+     * @throws MessagingException
+     */
+    @PostMapping("/job")
+    public ResponseEntity<UserResponse> sendJobNotification() throws MessagingException {
+        return new ResponseEntity<>(fellowshipCandidateService.notifyCandidate(), HttpStatus.ACCEPTED);
     }
 
     /**

@@ -17,7 +17,7 @@ public class ApplicationConfiguration {
     @PostConstruct
     private static void initMessageSourceAccessor() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames("classpath:messages");
+        messageSource.setBasenames("classpath:message");
         messageSourceAccessor = new MessageSourceAccessor(messageSource, Locale.getDefault());
     }
 
