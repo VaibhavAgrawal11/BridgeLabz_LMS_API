@@ -1,4 +1,7 @@
 package com.bridgelaz.bridgelabzlms.repository;
 
-public class UploadDocumentRepository {
+import com.bridgelaz.bridgelabzlms.models.UploadDocumentModel;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UploadDocumentRepository extends JpaRepository<UploadDocumentModel, Integer> {
 }

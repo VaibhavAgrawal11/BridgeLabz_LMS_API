@@ -1,4 +1,11 @@
 package com.bridgelaz.bridgelabzlms.dto;
 
-public class uploadDocumentDTO {
+import lombok.Data;
+
+@Data
+public class UploadDocumentDTO {
+    private Integer candidateId;
+    private String docType;
+    private String docPath;
+    private String status;
 }
