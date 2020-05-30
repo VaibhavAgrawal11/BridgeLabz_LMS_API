@@ -8,10 +8,13 @@ import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.service.IFellowshipCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/fellow")
@@ -98,4 +101,11 @@ public class FellowshipCandidateController {
         return new ResponseEntity<>(fellowshipCandidateService.updateCandidateEducationalInfo(educationalInfo, token)
                 , HttpStatus.CREATED);
     }
+
+    @PostMapping(value = "/doc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponse> uploadDocument(@RequestParam("file") MultipartFile file,
+                                                       @RequestParam(value = "id") Integer id) throws IOException, CustomServiceException {
+        return new ResponseEntity<>(fellowshipCandidateService.upload(file, id), HttpStatus.OK);
+    }
+
 }

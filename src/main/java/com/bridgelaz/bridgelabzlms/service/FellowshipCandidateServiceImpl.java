@@ -11,15 +11,27 @@ import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.DATA_NOT_FOUND;
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.INVALID_ID;
 
 @Service
@@ -40,6 +52,12 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     Token jwtToken;
     @Autowired
     JavaMailSender sender;
+
+    @Value("${upload.path}")
+    private String path;
+
+
+    private final Path fileLocation = java.nio.file.Paths.get(path);
 
     /**
      * Take data from hire candidate table and drop in fellowship candidate table
@@ -177,5 +195,21 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         candidateModel.setEducationalInformation("Updated");
         fellowshipCandidateRepository.save(candidateModel);
         return new UserResponse(educationalInfoModel, ApplicationConfiguration.getMessageAccessor().getMessage("114"));
+    }
+
+    @Override
+    public UserResponse upload(MultipartFile file, Integer id) throws CustomServiceException, IOException {
+        fellowshipCandidateRepository.findById(id)
+                .orElseThrow(() -> new CustomServiceException(DATA_NOT_FOUND, "Data not found"));
+        if (file.isEmpty())
+            throw new CustomServiceException(DATA_NOT_FOUND, "Failed to store empty file");
+        String uniqueId = UUID.randomUUID().toString();
+        Files.copy(file.getInputStream(), fileLocation.resolve(uniqueId),
+                StandardCopyOption.REPLACE_EXISTING);
+        UploadDocumentModel uploadDocument = new UploadDocumentModel();
+        uploadDocument.setCandidateId(id);
+        uploadDocument.setDocPath(uniqueId);
+        uploadDocument.setStatus("pending");
+        return new UserResponse(uploadDocument, ApplicationConfiguration.getMessageAccessor().getMessage("115"));
     }
 }
