@@ -1,10 +1,11 @@
 package com.bridgelaz.bridgelabzlms.dto;
 
+import com.bridgelaz.bridgelabzlms.models.FellowshipCandidateModel;
 import lombok.Data;
 
 @Data
 public class CandidateBankDetailsDTO {
-    int candidateId;
+    FellowshipCandidateModel candidateId;
     String name;
     String accountNumber;
     String isfcCode;

@@ -1,10 +1,11 @@
 package com.bridgelaz.bridgelabzlms.dto;
 
+import com.bridgelaz.bridgelabzlms.models.FellowshipCandidateModel;
 import lombok.Data;
 
 @Data
 public class EducationalInfoDTO {
-    private int candidateId;
+    private FellowshipCandidateModel candidateId;
     private String diploma;
     private String degreeName;
     private String employeeDiscipline;

@@ -53,11 +53,8 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Autowired
     JavaMailSender sender;
 
-    @Value("${upload.path}")
-    private String path;
 
-
-    private final Path fileLocation = java.nio.file.Paths.get(path);
+    private final Path fileLocation = java.nio.file.Paths.get("/home/vaibhav/Desktop/Spring/BridgeLabzLMS/src/main/resources/");
 
     /**
      * Take data from hire candidate table and drop in fellowship candidate table
@@ -96,11 +93,11 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     }
 
     /**
-     * Update Candidate bank details
+     * Update Candidate bank details, by taking information by user and mapping it with database
      *
      * @param candidateBankDetailsDTO
      * @param token
-     * @return
+     * @return UserResponse
      */
     @Override
     public UserResponse updateCandidateBankInfo(CandidateBankDetailsDTO candidateBankDetailsDTO, String token) throws CustomServiceException {
@@ -113,14 +110,14 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         candidateBankDetailsModel.setCreatorStamp(LocalDateTime.now());
         User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         candidateBankDetailsModel.setCreatorUser(user.getCreatorUser());
-        bankDetailsRepository.save(candidateBankDetailsModel);
-
         //Set bank info status as updated
         FellowshipCandidateModel model = fellowshipCandidateRepository
-                .findById(candidateBankDetailsModel.getCandidateId())
+                .findById(candidateBankDetailsModel.getCandidateId().getId())
                 .orElseThrow(() -> new CustomServiceException(INVALID_ID, "No such id present"));
         model.setBankInformation("Updated");
         fellowshipCandidateRepository.save(model);
+        bankDetailsRepository.save(candidateBankDetailsModel);
+
         return new UserResponse(bankDetailsRepository
                 , ApplicationConfiguration.getMessageAccessor().getMessage("111"));
     }
@@ -178,7 +175,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Override
     public UserResponse updateCandidateEducationalInfo(EducationalInfoDTO educationalInfo, String token) throws CustomServiceException {
         FellowshipCandidateModel candidateModel = fellowshipCandidateRepository.findById(educationalInfo
-                .getCandidateId())
+                .getCandidateId().getId())
                 .orElseThrow(() -> new CustomServiceException(INVALID_ID, "Invalid candidate id"));
         EducationalInfoModel educationalInfoModel = modelMapper.map(educationalInfo, EducationalInfoModel.class);
         educationalInfoModel.setIsDegreeNameVerified("No");
@@ -207,7 +204,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         Files.copy(file.getInputStream(), fileLocation.resolve(uniqueId),
                 StandardCopyOption.REPLACE_EXISTING);
         UploadDocumentModel uploadDocument = new UploadDocumentModel();
-        uploadDocument.setCandidateId(id);
+        uploadDocument.setCandidateId(new FellowshipCandidateModel(id));
         uploadDocument.setDocPath(uniqueId);
         uploadDocument.setStatus("pending");
         return new UserResponse(uploadDocument, ApplicationConfiguration.getMessageAccessor().getMessage("115"));

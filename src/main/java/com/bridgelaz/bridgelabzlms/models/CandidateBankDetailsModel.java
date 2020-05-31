@@ -1,6 +1,9 @@
 package com.bridgelaz.bridgelabzlms.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,17 +14,21 @@ import java.time.LocalDateTime;
 public class CandidateBankDetailsModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    int candidateId;
-    String name;
-    String accountNumber;
-    String isAccountNumberVerified;
-    String isfcCode;
-    String isIsfcCodeVerified;
-    String panNumber;
-    String isPanNumberVerified;
-    Long aadharNumber;
-    String isAadharNumberVerified;
-    String creatorUser;
-    LocalDateTime creatorStamp;
+    private int id;
+    @ManyToOne
+    @JoinColumn
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private FellowshipCandidateModel candidateId;
+    private String name;
+    private String accountNumber;
+    private String isAccountNumberVerified;
+    private String isfcCode;
+    private String isIsfcCodeVerified;
+    private String panNumber;
+    private String isPanNumberVerified;
+    private Long aadharNumber;
+    private String isAadharNumberVerified;
+    private String creatorUser;
+    private LocalDateTime creatorStamp;
 }

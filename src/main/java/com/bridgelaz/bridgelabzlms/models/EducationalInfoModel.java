@@ -1,6 +1,9 @@
 package com.bridgelaz.bridgelabzlms.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,8 +14,12 @@ import java.time.LocalDateTime;
 public class EducationalInfoModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    private int candidateId;
+    private int id;
+    @ManyToOne
+    @JoinColumn
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private FellowshipCandidateModel candidateId;
     private String diploma;
     private String degreeName;
     private String isDegreeNameVerified;

@@ -40,4 +40,8 @@ public class FellowshipCandidateModel {
     private String creatorUser;
     private String bankInformation;
     private String educationalInformation;
+
+    public FellowshipCandidateModel(int id) {
+        this.id = id;
+    }
 }
