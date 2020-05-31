@@ -8,6 +8,7 @@ import com.bridgelaz.bridgelabzlms.models.User;
 import com.bridgelaz.bridgelabzlms.repository.HiredCandidateRepository;
 import com.bridgelaz.bridgelabzlms.repository.UserRepository;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
+import com.bridgelaz.bridgelabzlms.util.CandidateResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -30,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.*;
+import static com.bridgelaz.bridgelabzlms.util.CandidateResponse.*;
 
 @Service
 public class HireCandidateServiceImpl implements IHireCandidateService {
@@ -45,6 +47,10 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
     private Token jwtToken;
     @Autowired
     private UserRepository userRepository;
+
+    private final String rejected = String.valueOf(REJECTED);
+    private final String accepted = String.valueOf(ACCEPTED);
+    private final String pending = String.valueOf(PENDING);
 
     /**
      * Prepare list from excel file
@@ -114,7 +120,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
                 hiredCandidate.setKnowledgeRemark(cell.getStringCellValue());
                 cell = list.get(j++);
                 hiredCandidate.setAggregateRemark(cell.getStringCellValue());
-                hiredCandidate.setStatus("pending");
+                hiredCandidate.setStatus(pending);
                 hiredCandidate.setCreatorStamp(LocalDateTime.now());
                 //Getting user with help of JWT token
                 User user = userRepository.findByEmail(
@@ -191,7 +197,7 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
                 .orElseThrow(
                         () -> new CustomServiceException(INVALID_EMAIL_ID, "No such id exist in data base.")
                 );
-        if (candidateResponse.equals("Accepted") || candidateResponse.equals("Rejected")) {
+        if (candidateResponse.equals(accepted) || candidateResponse.equals(rejected)) {
             hiredCandidateModel.setStatus(candidateResponse);
             hiredCandidateRepository.save(hiredCandidateModel);
             return new UserResponse(hiredCandidateModel,

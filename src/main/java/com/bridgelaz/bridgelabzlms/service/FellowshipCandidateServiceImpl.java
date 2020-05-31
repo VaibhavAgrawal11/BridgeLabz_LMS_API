@@ -8,12 +8,10 @@ import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.*;
 import com.bridgelaz.bridgelabzlms.repository.*;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
+import com.bridgelaz.bridgelabzlms.util.DocumentStatus;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -21,8 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +29,9 @@ import java.util.UUID;
 
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.DATA_NOT_FOUND;
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.INVALID_ID;
+import static com.bridgelaz.bridgelabzlms.util.DocumentStatus.PENDING;
+import static com.bridgelaz.bridgelabzlms.util.DocumentStatus.UPDATED;
+import static com.bridgelaz.bridgelabzlms.util.Verification.NOT_VERIFIED;
 
 @Service
 public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
@@ -53,12 +52,14 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Autowired
     JavaMailSender sender;
 
-
     private final Path fileLocation = java.nio.file.Paths.get("/home/vaibhav/Desktop/Spring/BridgeLabzLMS/src/main/resources/");
+    private final String verification = String.valueOf(NOT_VERIFIED);
+    private final String updated = String.valueOf(UPDATED);
+    private final String pending = String.valueOf(PENDING);
 
     /**
      * Take data from hire candidate table and drop in fellowship candidate table
-     * If the status of the candidate is accepted the only he/she is transferred
+     * If the status of the candidate is accepted then only he/she is transferred
      *
      * @param token
      * @return user response
@@ -73,8 +74,8 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
                         .map(candidate, FellowshipCandidateModel.class);
                 fellowshipCandidate.setCreatorUser(user.getCreatorUser());
                 fellowshipCandidate.setCreatorStamp(LocalDateTime.now());
-                fellowshipCandidate.setBankInformation("Pending");
-                fellowshipCandidate.setEducationalInformation("Pending");
+                fellowshipCandidate.setBankInformation(pending);
+                fellowshipCandidate.setEducationalInformation(pending);
                 fellowshipCandidateRepository.save(fellowshipCandidate);
             }
         }
@@ -103,10 +104,10 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     public UserResponse updateCandidateBankInfo(CandidateBankDetailsDTO candidateBankDetailsDTO, String token) throws CustomServiceException {
         CandidateBankDetailsModel candidateBankDetailsModel =
                 modelMapper.map(candidateBankDetailsDTO, CandidateBankDetailsModel.class);
-        candidateBankDetailsModel.setIsAadharNumberVerified("No");
-        candidateBankDetailsModel.setIsAccountNumberVerified("No");
-        candidateBankDetailsModel.setIsPanNumberVerified("No");
-        candidateBankDetailsModel.setIsIsfcCodeVerified("No");
+        candidateBankDetailsModel.setIsAadharNumberVerified(verification);
+        candidateBankDetailsModel.setIsAccountNumberVerified(verification);
+        candidateBankDetailsModel.setIsPanNumberVerified(verification);
+        candidateBankDetailsModel.setIsIsfcCodeVerified(verification);
         candidateBankDetailsModel.setCreatorStamp(LocalDateTime.now());
         User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         candidateBankDetailsModel.setCreatorUser(user.getCreatorUser());
@@ -114,7 +115,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         FellowshipCandidateModel model = fellowshipCandidateRepository
                 .findById(candidateBankDetailsModel.getCandidateId().getId())
                 .orElseThrow(() -> new CustomServiceException(INVALID_ID, "No such id present"));
-        model.setBankInformation("Updated");
+        model.setBankInformation(updated);
         fellowshipCandidateRepository.save(model);
         bankDetailsRepository.save(candidateBankDetailsModel);
 
@@ -158,7 +159,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         FellowshipCandidateModel candidateModel = fellowshipCandidateRepository.findById(candidateId)
                 .orElseThrow(() -> new CustomServiceException(INVALID_ID, "Id is not present in data base."));
         modelMapper.map(personalDetails, candidateModel);
-        candidateModel.setIsBirthDateVerified("No");
+        candidateModel.setIsBirthDateVerified(verification);
         fellowshipCandidateRepository.save(candidateModel);
         //Displaying the updated changes
         return new UserResponse(candidateModel, ApplicationConfiguration.getMessageAccessor().getMessage("113"));
@@ -178,18 +179,18 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
                 .getCandidateId().getId())
                 .orElseThrow(() -> new CustomServiceException(INVALID_ID, "Invalid candidate id"));
         EducationalInfoModel educationalInfoModel = modelMapper.map(educationalInfo, EducationalInfoModel.class);
-        educationalInfoModel.setIsDegreeNameVerified("No");
-        educationalInfoModel.setIsEmployeeDisciplineVerified("No");
-        educationalInfoModel.setIsFinalYearPerVerified("No");
-        educationalInfoModel.setIsOtherTrainingVerified("No");
-        educationalInfoModel.setIsPassingYearVerified("No");
-        educationalInfoModel.setIsTrainingDurationMonthVerified("No");
-        educationalInfoModel.setIsTrainingInstituteVerified("No");
+        educationalInfoModel.setIsDegreeNameVerified(verification);
+        educationalInfoModel.setIsEmployeeDisciplineVerified(verification);
+        educationalInfoModel.setIsFinalYearPerVerified(verification);
+        educationalInfoModel.setIsOtherTrainingVerified(verification);
+        educationalInfoModel.setIsPassingYearVerified(verification);
+        educationalInfoModel.setIsTrainingDurationMonthVerified(verification);
+        educationalInfoModel.setIsTrainingInstituteVerified(verification);
         educationalInfoModel.setCreatorStamp(LocalDateTime.now());
         User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         educationalInfoModel.setCreatorUser(user.getCreatorUser());
         educationalInfoRepository.save(educationalInfoModel);
-        candidateModel.setEducationalInformation("Updated");
+        candidateModel.setEducationalInformation(updated);
         fellowshipCandidateRepository.save(candidateModel);
         return new UserResponse(educationalInfoModel, ApplicationConfiguration.getMessageAccessor().getMessage("114"));
     }
@@ -206,7 +207,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         UploadDocumentModel uploadDocument = new UploadDocumentModel();
         uploadDocument.setCandidateId(new FellowshipCandidateModel(id));
         uploadDocument.setDocPath(uniqueId);
-        uploadDocument.setStatus("pending");
+        uploadDocument.setStatus(verification);
         return new UserResponse(uploadDocument, ApplicationConfiguration.getMessageAccessor().getMessage("115"));
     }
 }
