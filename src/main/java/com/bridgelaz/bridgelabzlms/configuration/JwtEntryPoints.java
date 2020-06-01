@@ -7,12 +7,10 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.Serializable;
 
 @Component
-public class JwtEntryPoints implements AuthenticationEntryPoint, Serializable {
+public class JwtEntryPoints implements AuthenticationEntryPoint {
 
-    private static final long serialVersionUID = 763706453912927477L;
 
     /**
      * Rejects every unauthenticated request and sends error

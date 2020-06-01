@@ -26,7 +26,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtEntryPoints jwtEntryPoint;
 
-    @Qualifier("userServiceImpl")
     @Autowired
     private UserDetailsService userService;
 
