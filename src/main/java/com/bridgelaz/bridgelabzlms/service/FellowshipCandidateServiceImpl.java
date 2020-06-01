@@ -8,8 +8,10 @@ import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.*;
 import com.bridgelaz.bridgelabzlms.repository.*;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
-import com.bridgelaz.bridgelabzlms.util.DocumentStatus;
+import com.bridgelaz.bridgelabzlms.util.CandidateResponse;
 import com.bridgelaz.bridgelabzlms.util.Token;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,13 +21,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.DATA_NOT_FOUND;
 import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.ExceptionType.INVALID_ID;
@@ -35,6 +38,10 @@ import static com.bridgelaz.bridgelabzlms.util.Verification.NOT_VERIFIED;
 
 @Service
 public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
+    private final Path fileLocation = java.nio.file.Paths.get("/home/vaibhav/Desktop/Spring/BridgeLabzLMS/src/main/resources/");
+    private final String verification = String.valueOf(NOT_VERIFIED);
+    private final String updated = String.valueOf(UPDATED);
+    private final String pending = String.valueOf(PENDING);
     @Autowired
     ModelMapper modelMapper;
     @Autowired
@@ -48,14 +55,15 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     @Autowired
     EducationalInfoRepository educationalInfoRepository;
     @Autowired
+    UploadDocumentRepository documentRepository;
+    @Autowired
     Token jwtToken;
     @Autowired
     JavaMailSender sender;
+    @Autowired
+    Cloudinary cloudinary;
 
-    private final Path fileLocation = java.nio.file.Paths.get("/home/vaibhav/Desktop/Spring/BridgeLabzLMS/src/main/resources/");
-    private final String verification = String.valueOf(NOT_VERIFIED);
-    private final String updated = String.valueOf(UPDATED);
-    private final String pending = String.valueOf(PENDING);
+    String accepted = String.valueOf(CandidateResponse.ACCEPTED);
 
     /**
      * Take data from hire candidate table and drop in fellowship candidate table
@@ -69,7 +77,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         List<HiredCandidateModel> candidates = hiredCandidateRepository.findAll();
         User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
         for (HiredCandidateModel candidate : candidates) {
-            if (candidate.getStatus().equals("Accepted")) {
+            if (candidate.getStatus().equals(accepted)) {
                 FellowshipCandidateModel fellowshipCandidate = modelMapper
                         .map(candidate, FellowshipCandidateModel.class);
                 fellowshipCandidate.setCreatorUser(user.getCreatorUser());
@@ -196,18 +204,33 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     }
 
     @Override
-    public UserResponse upload(MultipartFile file, Integer id) throws CustomServiceException, IOException {
+    public UserResponse upload(MultipartFile file, String token, int id) throws CustomServiceException, IOException {
         fellowshipCandidateRepository.findById(id)
                 .orElseThrow(() -> new CustomServiceException(DATA_NOT_FOUND, "Data not found"));
         if (file.isEmpty())
             throw new CustomServiceException(DATA_NOT_FOUND, "Failed to store empty file");
-        String uniqueId = UUID.randomUUID().toString();
-        Files.copy(file.getInputStream(), fileLocation.resolve(uniqueId),
-                StandardCopyOption.REPLACE_EXISTING);
         UploadDocumentModel uploadDocument = new UploadDocumentModel();
-        uploadDocument.setCandidateId(new FellowshipCandidateModel(id));
-        uploadDocument.setDocPath(uniqueId);
+        User user = userRepository.findByEmail(jwtToken.getUsernameFromToken(token)).get();
+        uploadDocument.setCreatorUser(user.getCreatorUser());
+        uploadDocument.setDocPath(uploadFile(file));
         uploadDocument.setStatus(verification);
+        uploadDocument.setDocType(file.getContentType());
+        uploadDocument.setCandidateId(new FellowshipCandidateModel(id));
+        documentRepository.save(uploadDocument);
         return new UserResponse(uploadDocument, ApplicationConfiguration.getMessageAccessor().getMessage("115"));
+    }
+
+    private String uploadFile(MultipartFile file) throws IOException {
+        File fileToUpload = convertMultipartToFile(file);
+        Map uploadResult = cloudinary.uploader().upload(fileToUpload, ObjectUtils.emptyMap());
+        return uploadResult.get("url").toString();
+    }
+
+    private File convertMultipartToFile(MultipartFile file) throws IOException {
+        File convertFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+        FileOutputStream fos = new FileOutputStream(convertFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convertFile;
     }
 }

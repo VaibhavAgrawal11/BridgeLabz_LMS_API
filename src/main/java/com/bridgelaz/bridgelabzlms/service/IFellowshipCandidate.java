@@ -23,5 +23,5 @@ public interface IFellowshipCandidate {
 
     UserResponse updateCandidateEducationalInfo(EducationalInfoDTO educationalInfo, String token) throws CustomServiceException;
 
-    UserResponse upload(MultipartFile file, Integer id) throws CustomServiceException, IOException;
+    UserResponse upload(MultipartFile file, String token, int id) throws CustomServiceException, IOException;
 }

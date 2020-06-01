@@ -104,8 +104,9 @@ public class FellowshipCandidateController {
 
     @PostMapping(value = "/doc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> uploadDocument(@RequestParam("file") MultipartFile file,
-                                                       @RequestParam(value = "id") Integer id) throws IOException, CustomServiceException {
-        return new ResponseEntity<>(fellowshipCandidateService.upload(file, id), HttpStatus.OK);
+                                                       @RequestParam int id,
+                                                       @RequestParam String token) throws IOException, CustomServiceException {
+        return new ResponseEntity<>(fellowshipCandidateService.upload(file, token,id), HttpStatus.OK);
     }
 
 }

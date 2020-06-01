@@ -1,6 +1,7 @@
 package com.bridgelaz.bridgelabzlms.models;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.util.Date;
 @Table()
 @Entity(name = "FellowshipCandidate")
 @Data
+@NoArgsConstructor
 public class FellowshipCandidateModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
