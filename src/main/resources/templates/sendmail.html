@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Send Email</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
+    <!-- use the font -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 48px;
+        }
+    </style>
+</head>
+<body>
+<p th:text="${'Hello Dear ' + name}"></p>
+<p>Congratulations, you are been shortlisted for our fellowship plan,
+    You need to respond ACCEPTED to continue with fellowship plan</p>
+<p><a th:href="${acceptLink}">
+    <button>Accept</button>
+</a>    <a th:href="rejectLink">
+    <button>Reject</button>
+</a></p>
+</body>
+</html>
