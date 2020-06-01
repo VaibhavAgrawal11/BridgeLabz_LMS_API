@@ -69,7 +69,7 @@ public class HireCandidateController {
      * @return UserResponse
      * @throws CustomServiceException
      */
-    @PutMapping("/updatestatus")
+    @GetMapping("/updatestatus")
     public ResponseEntity<UserResponse> update(@RequestParam String candidateResponse,
                                                @RequestParam String emailId) throws CustomServiceException {
         return new ResponseEntity<>(hiredCandidateService.updateStatus(candidateResponse, emailId)

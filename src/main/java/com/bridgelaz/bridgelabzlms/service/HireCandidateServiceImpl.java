@@ -20,11 +20,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,6 +50,8 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
     private Token jwtToken;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
     private final String rejected = String.valueOf(REJECTED);
     private final String accepted = String.valueOf(ACCEPTED);
@@ -147,12 +152,16 @@ public class HireCandidateServiceImpl implements IHireCandidateService {
                         () -> new CustomServiceException(INVALID_EMAIL_ID, "No such id exist in data base.")
                 );
         MimeMessage message = sender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        final Context ctx = new Context();
+        ctx.setVariable("name", hiredCandidateModel.getFirstName());
+        ctx.setVariable("acceptLink", "http://localhost:8081/hirecandidate/updatestatus?candidateResponse=ACCEPTED&emailId=" + emailId);
+        ctx.setVariable("rejectLink", "http://localhost:8081/hirecandidate/updatestatus?candidateResponse=REJECTED&emailId=" + emailId);
+        String html = templateEngine.process("sendmail", ctx);
         helper.setTo(emailId);
-        helper.setText("Hello " + hiredCandidateModel.getFirstName() + " " + hiredCandidateModel.getLastName() + "," + "\n\n" +
-                "Congratulations, you are been shortlisted for our fellowship plan." + "\n" +
-                "You need to respond ACCEPTED to continue with fellowship plan" + "\n" +
-                "http://localhost:8081/hirecandidate/updatestatus?candidateResponse=" + null + "&emailId=" + emailId);
+        helper.setText(html, true);
         helper.setSubject("Fellowship Shortlist");
         sender.send(message);
     }
