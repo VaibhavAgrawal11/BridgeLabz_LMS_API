@@ -8,10 +8,12 @@ import com.bridgelaz.bridgelabzlms.repository.UserRepository;
 import com.bridgelaz.bridgelabzlms.request.LoginRequest;
 import com.bridgelaz.bridgelabzlms.response.LoginResponse;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
+import com.bridgelaz.bridgelabzlms.util.RedisUtil;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -36,6 +38,8 @@ import static com.bridgelaz.bridgelabzlms.exception.CustomServiceException.Excep
 public class UserServiceImpl implements IUserService {
     @Autowired
     EntityManager entityManager;
+    @Value("${redisKey}")
+    private String REDIS_KEY;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -48,7 +52,8 @@ public class UserServiceImpl implements IUserService {
     private Token jwtToken;
     @Autowired
     private AuthenticationManager authenticationManager;
-
+    @Autowired
+    private RedisUtil<Object> redis;
     @Autowired
     private Token jwtTokenUtil;
 
@@ -131,6 +136,7 @@ public class UserServiceImpl implements IUserService {
 
         final String token = jwtTokenUtil.generateToken(userDetails);
 
+        redis.putMap(REDIS_KEY, userDetails.getUsername(), token);
         return ResponseEntity.ok(new LoginResponse(token
                 , ApplicationConfiguration.getMessageAccessor().getMessage("102")));
     }
