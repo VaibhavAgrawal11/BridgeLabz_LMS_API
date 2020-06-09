@@ -4,23 +4,23 @@ import com.bridgelaz.bridgelabzlms.configuration.ApplicationConfiguration;
 import com.bridgelaz.bridgelabzlms.dto.CandidateBankDetailsDTO;
 import com.bridgelaz.bridgelabzlms.dto.EducationalInfoDTO;
 import com.bridgelaz.bridgelabzlms.dto.PersonalDetailsDTO;
+import com.bridgelaz.bridgelabzlms.dto.RabbitMqDTO;
 import com.bridgelaz.bridgelabzlms.exception.CustomServiceException;
 import com.bridgelaz.bridgelabzlms.models.*;
 import com.bridgelaz.bridgelabzlms.repository.*;
 import com.bridgelaz.bridgelabzlms.response.UserResponse;
 import com.bridgelaz.bridgelabzlms.util.CandidateResponse;
+import com.bridgelaz.bridgelabzlms.util.RabbitMq;
 import com.bridgelaz.bridgelabzlms.util.Token;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,6 +62,10 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     JavaMailSender sender;
     @Autowired
     Cloudinary cloudinary;
+    @Autowired
+    RabbitMqDTO rabbitMqDTO;
+    @Autowired
+    RabbitMq rabbitMailSender;
 
     String accepted = String.valueOf(CandidateResponse.ACCEPTED);
 
@@ -132,7 +136,7 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
     }
 
     /**
-     * Send jo offer notification to all fellowship students
+     * Send job offer notification to all fellowship students
      *
      * @return
      * @throws MessagingException
@@ -142,14 +146,13 @@ public class FellowshipCandidateServiceImpl implements IFellowshipCandidate {
         List<FellowshipCandidateModel> fellowshipCandidateList = fellowshipCandidateRepository.findAll();
         for (FellowshipCandidateModel candidate : fellowshipCandidateList) {
             String emailId = candidate.getEmailId();
-            MimeMessage message = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
-            helper.setTo(emailId);
-            helper.setText("Hello " + candidate.getFirstName() + " " + candidate.getLastName() + "," + "\n\n" +
+            rabbitMqDTO.setTo(emailId);
+            rabbitMqDTO.setSubject("Job Offer Notification");
+            rabbitMqDTO.setBody("Hello " + candidate.getFirstName() + " " + candidate.getLastName() + "," + "\n\n" +
                     "Congratulations, you have accepted our 4 months fellowship course," +
                     "\n This is the job notification mail");
-            helper.setSubject("Job Offer Notification");
-            sender.send(message);
+            rabbitMailSender.sendMessageToQueue(rabbitMqDTO);
+            rabbitMailSender.RabbitSend(rabbitMqDTO);
         }
         return new UserResponse(true, ApplicationConfiguration.getMessageAccessor().getMessage("112"));
     }
